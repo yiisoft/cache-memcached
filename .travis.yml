@@ -31,7 +31,6 @@ env:
     - DEFAULT_COMPOSER_FLAGS="--prefer-dist --no-interaction --no-progress --optimize-autoloader"
     - TASK_TESTS_PHP=1
     - TASK_TESTS_COVERAGE=0
-    - TRAVIS_SECOND_USER=travis_two
 
 
 services:
@@ -66,19 +65,13 @@ install:
       phpenv config-rm xdebug.ini || echo "xdebug is not installed"
     fi
 
+  # setup PHP extension
+  - echo "extension=memcached.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
   # install composer dependencies
   - travis_retry composer self-update
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - travis_retry composer install $DEFAULT_COMPOSER_FLAGS
-
-  # setup PHP extension
-  - |
-    if [[ $TASK_TESTS_PHP == 1 && $TRAVIS_PHP_VERSION != nightly ]]; then
-      tests/travis/memcache-setup.sh
-    fi
-
-  # Needed for FileCacheTest
-  - sudo useradd $TRAVIS_SECOND_USER --gid $(id -g) -M
 
 before_script:
   # show some versions and env information
