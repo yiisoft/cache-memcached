@@ -12,5 +12,5 @@ This library provides the Memcached handler for the [yiisoft/cache] library.
 
 [![Latest Stable Version](https://poser.pugx.org/yiisoft/cache-memcached/v/stable.png)](https://packagist.org/packages/yiisoft/cache-memcached)
 [![Total Downloads](https://poser.pugx.org/yiisoft/cache-memcached/downloads.png)](https://packagist.org/packages/yiisoft/cache-memcached)
-[![Build Status](https://travis-ci.org/yiisoft/cache-memcached.svg?branch=master)](https://travis-ci.org/yiisoft/cache-memcached)
+[![Build Status](https://travis-ci.com/yiisoft/cache-memcached.svg?branch=master)](https://travis-ci.com/yiisoft/cache-memcached)
 
