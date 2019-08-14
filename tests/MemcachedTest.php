@@ -297,6 +297,7 @@ class MemcachedTest extends TestCase
         return [
             [123, 123],
             ['123', 123],
+            ['', 0],
             [null, null],
             [0, 0],
             [new DateInterval('PT6H8M'), 6 * 3600 + 8 * 60],
