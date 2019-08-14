@@ -28,12 +28,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Yiisoft\\Memcached\\": "src"
+            "Yiisoft\\Cache\\Memcached\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Yiisoft\\Memcached\\Tests\\": "tests"
+            "Yiisoft\\Cache\\Memcached\\Tests\\": "tests"
         }
     },
     "extra": {

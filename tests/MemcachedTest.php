@@ -1,6 +1,6 @@
 <?php
 
-namespace Yiisoft\Memcached\Tests;
+namespace Yiisoft\Cache\Memcached\Tests;
 
 require_once __DIR__ . '/MockHelper.php';
 
@@ -8,9 +8,9 @@ use DateInterval;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
-use Yiisoft\Memcached\CacheException;
-use Yiisoft\Memcached\Memcached;
-use Yiisoft\Memcached\MockHelper;
+use Yiisoft\Cache\Memcached\CacheException;
+use Yiisoft\Cache\Memcached\Memcached;
+use Yiisoft\Cache\Memcached\MockHelper;
 
 class MemcachedTest extends TestCase
 {

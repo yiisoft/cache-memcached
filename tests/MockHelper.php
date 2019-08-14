@@ -1,6 +1,6 @@
 <?php
 
-namespace Yiisoft\Memcached;
+namespace Yiisoft\Cache\Memcached;
 
 /**
  * Mock for the time() function

@@ -1,6 +1,6 @@
 <?php
 
-namespace Yiisoft\Memcached;
+namespace Yiisoft\Cache\Memcached;
 
 class InvalidArgumentException extends \RuntimeException implements \Psr\SimpleCache\InvalidArgumentException
 {
