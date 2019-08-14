@@ -21,8 +21,8 @@ class MemcachedTest extends TestCase
         }
 
         // check whether memcached is running and skip tests if not.
-        if (!@stream_socket_client('127.0.0.1:11211', $errorNumber, $errorDescription, 0.5)) {
-            self::markTestSkipped('No memcached server running at ' . '127.0.0.1:11211' . ' : ' . $errorNumber . ' - ' . $errorDescription);
+        if (!@stream_socket_client(MEMCACHED_HOST . ':' . MEMCACHED_PORT, $errorNumber, $errorDescription, 0.5)) {
+            self::markTestSkipped('No memcached server running at ' . MEMCACHED_HOST . ':' . MEMCACHED_PORT . ' : ' . $errorNumber . ' - ' . $errorDescription);
         }
     }
 
@@ -31,14 +31,17 @@ class MemcachedTest extends TestCase
         MockHelper::$time = null;
     }
 
-    protected function createCacheInstance(): CacheInterface
+    protected function createCacheInstance($persistentId = '', array $servers = []): CacheInterface
     {
-        return new Memcached();
+        if ($servers === []) {
+            $servers = [[MEMCACHED_HOST, MEMCACHED_PORT]];
+        }
+        return new Memcached($persistentId, $servers);
     }
 
     public function testDeleteMultipleReturnsFalse(): void
     {
-        $cache = new Memcached();
+        $cache = $this->createCacheInstance();
 
         $memcachedStub = $this->createMock(\Memcached::class);
         $memcachedStub->method('deleteMulti')->willReturn([false]);
@@ -54,7 +57,7 @@ class MemcachedTest extends TestCase
         MockHelper::$time = \time();
         $expiration = MockHelper::$time + $ttl;
 
-        $cache = new Memcached();
+        $cache = $this->createCacheInstance();
 
         $memcached = $this->createMock(\Memcached::class);
 
@@ -279,7 +282,7 @@ class MemcachedTest extends TestCase
      */
     public function testNormalizeTtl($ttl, $expectedResult): void
     {
-        $cache = new Memcached();
+        $cache = $this->createCacheInstance();
         $this->assertSameExceptObject($expectedResult, $this->invokeMethod($cache, 'normalizeTtl', [$ttl]));
     }
 
@@ -313,7 +316,7 @@ class MemcachedTest extends TestCase
             MockHelper::$time = \time();
             $expected = MockHelper::$time + $ttl;
         }
-        $cache = new Memcached();
+        $cache = $this->createCacheInstance();
         $this->assertSameExceptObject($expected, $this->invokeMethod($cache, 'ttlToExpiration', [$ttl]));
     }
 
@@ -375,25 +378,25 @@ class MemcachedTest extends TestCase
 
     public function testGetCache(): void
     {
-        $cache = new Memcached();
+        $cache = $this->createCacheInstance();
         $memcached = $cache->getCache();
         $this->assertInstanceOf(\Memcached::class, $memcached);
     }
 
     public function testPersistentId(): void
     {
-        $cache1 = new Memcached();
+        $cache1 = $this->createCacheInstance();
         $memcached1 = $cache1->getCache();
         $this->assertFalse($memcached1->isPersistent());
 
-        $cache2 = new Memcached(microtime() . __METHOD__);
+        $cache2 = $this->createCacheInstance(microtime() . __METHOD__);
         $memcached2 = $cache2->getCache();
         $this->assertTrue($memcached2->isPersistent());
     }
 
     public function testGetNewServers(): void
     {
-        $cache = new Memcached();
+        $cache = $this->createCacheInstance();
 
         $memcachedStub = $this->createMock(\Memcached::class);
         $memcachedStub->method('getServerList')->willReturn([['host' => '1.1.1.1', 'port' => 11211]]);
@@ -412,7 +415,7 @@ class MemcachedTest extends TestCase
 
     public function testThatServerWeightIsOptional(): void
     {
-        $cache = new Memcached(microtime() . __METHOD__, [
+        $cache = $this->createCacheInstance(microtime() . __METHOD__, [
             ['1.1.1.1', 11211, 1],
             ['2.2.2.2', 11211],
         ]);
@@ -439,7 +442,7 @@ class MemcachedTest extends TestCase
     public function testInvalidServersConfig($servers): void
     {
         $this->expectException(CacheException::class);
-        $cache = new Memcached('', $servers);
+        $cache = $this->createCacheInstance('', $servers);
     }
 
     public function invalidServersConfigProvider(): array
