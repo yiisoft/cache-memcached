@@ -1,5 +1,5 @@
-Yii Cache - Memcached Handler Change Log
-========================================
+# Memcached Change Log
 
-3.0.0 under development
------------------------
+## 1.0.0 under development
+
+- Initial release.
