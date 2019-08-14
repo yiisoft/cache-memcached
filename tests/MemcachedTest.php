@@ -63,7 +63,7 @@ class MemcachedTest extends TestCase
 
         $memcached->expects($this->once())
             ->method('set')
-            ->with($this->equalTo('key'), $this->equalTo('value'), $expiration)
+            ->with($this->equalTo('key'), $this->equalTo('value'), $this->equalTo($expiration))
             ->willReturn(true);
 
         $this->setInaccessibleProperty($cache, 'cache', $memcached);
@@ -463,5 +463,32 @@ class MemcachedTest extends TestCase
 
         $cache->setMultiple(['b' => 2]);
         $this->assertSameExceptObject(['b' => 2], $cache->getMultiple(['b']));
+    }
+
+    public function testFailInitServers(): void
+    {
+        $this->expectException(CacheException::class);
+
+        $cache = $this->createCacheInstance();
+
+        $memcachedStub = $this->createMock(\Memcached::class);
+        $memcachedStub->method('addServers')->willReturn(false);
+
+        $this->setInaccessibleProperty($cache, 'cache', $memcachedStub);
+
+        $this->invokeMethod($cache, 'initServers', [[]]);
+    }
+
+    public function testInitDefaultServer(): void
+    {
+        $cache = new Memcached();
+        $memcached = $cache->getCache();
+        $this->assertEquals([
+            [
+                'host' => '127.0.0.1',
+                'port' => 11211,
+                'type' => 'TCP',
+            ],
+        ], $memcached->getServerList());
     }
 }
