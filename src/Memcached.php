@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Yiisoft\Memcached;
 
@@ -48,7 +48,7 @@ final class Memcached implements CacheInterface
      * @see https://www.php.net/manual/en/memcached.construct.php
      * @see https://www.php.net/manual/en/memcached.addservers.php
      */
-    public function __construct($persistentId = '', array $servers = [])
+    public function __construct(string $persistentId = '', array $servers = [])
     {
         $this->validateServers($servers);
         $this->persistentId = $persistentId;
@@ -154,14 +154,18 @@ final class Memcached implements CacheInterface
     /**
      * @noinspection PhpDocMissingThrowsInspection DateTime won't throw exception because constant string is passed as time
      *
-     * Normalizes cache TTL handling `null` value and {@see DateInterval} objects.
-     * @param int|DateInterval|null $ttl raw TTL.
+     * Normalizes cache TTL handling strings and {@see DateInterval} objects.
+     * @param int|string|DateInterval|null $ttl raw TTL.
      * @return int|null TTL value as UNIX timestamp or null meaning infinity
      */
     private function normalizeTtl($ttl): ?int
     {
         if ($ttl instanceof DateInterval) {
             return (new DateTime('@0'))->add($ttl)->getTimestamp();
+        }
+
+        if (is_string($ttl)) {
+            return (int)$ttl;
         }
 
         return $ttl;
