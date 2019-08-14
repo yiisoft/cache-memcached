@@ -15,6 +15,11 @@ cache:
 install:
   - travis_retry composer self-update && composer --version
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  # setup PHP extension
+  - |
+    if [[ $TRAVIS_PHP_VERSION != nightly ]]; then
+      source tests/travis/memcache-setup.sh
+    fi
   - travis_retry composer install --prefer-dist --no-interaction
 
 script:
@@ -22,5 +27,5 @@ script:
     vendor/bin/phpunit $PHPUNIT_FLAGS --coverage-clover=coverage.clover
 
 after_script:
-    - wget -c https://scrutinizer-ci.com/ocular.phar
-    - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+  - wget -c https://scrutinizer-ci.com/ocular.phar
+  - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
