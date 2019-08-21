@@ -88,8 +88,13 @@ final class Memcached implements CacheInterface
 
     public function getMultiple($keys, $default = null): iterable
     {
-        $values = $this->cache->getMulti($this->iterableToArray($keys));
-        return array_merge(array_fill_keys($this->iterableToArray($keys), $default), $values);
+        $valuesFromCache = $this->cache->getMulti($this->iterableToArray($keys));
+        $values = array_fill_keys($this->iterableToArray($keys), $default);
+        foreach ($values as $key => $value) {
+            $values[$key] = $valuesFromCache[$key] ?? $value;
+        }
+
+        return $values;
     }
 
     public function setMultiple($values, $ttl = null): bool

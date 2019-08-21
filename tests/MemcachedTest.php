@@ -206,7 +206,7 @@ class MemcachedTest extends TestCase
         $cache->setMultiple($data, $ttl);
 
         foreach ($data as $key => $value) {
-            $this->assertSameExceptObject($value, $cache->get($key));
+            $this->assertSameExceptObject($value, $cache->get((string)$key));
         }
     }
 
