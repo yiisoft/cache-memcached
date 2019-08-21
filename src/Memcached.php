@@ -58,6 +58,7 @@ final class Memcached implements CacheInterface
 
     public function get($key, $default = null)
     {
+        $this->validateKey($key);
         $value = $this->cache->get($key);
 
         if ($this->cache->getResultCode() === \Memcached::RES_SUCCESS) {
@@ -69,6 +70,7 @@ final class Memcached implements CacheInterface
 
     public function set($key, $value, $ttl = null): bool
     {
+        $this->validateKey($key);
         $expiration = $this->ttlToExpiration($ttl);
         if ($expiration < 0) {
             return $this->delete($key);
@@ -78,6 +80,7 @@ final class Memcached implements CacheInterface
 
     public function delete($key): bool
     {
+        $this->validateKey($key);
         return $this->cache->delete($key);
     }
 
@@ -88,6 +91,7 @@ final class Memcached implements CacheInterface
 
     public function getMultiple($keys, $default = null): iterable
     {
+        $this->validateKey($keys, true);
         $valuesFromCache = $this->cache->getMulti($this->iterableToArray($keys));
         $values = array_fill_keys($this->iterableToArray($keys), $default);
         foreach ($values as $key => $value) {
@@ -99,12 +103,14 @@ final class Memcached implements CacheInterface
 
     public function setMultiple($values, $ttl = null): bool
     {
+        $this->validateKey($values, true, true);
         $expiration = $this->ttlToExpiration($ttl);
         return $this->cache->setMulti($this->iterableToArray($values), $expiration);
     }
 
     public function deleteMultiple($keys): bool
     {
+        $this->validateKey($keys, true);
         foreach ($this->cache->deleteMulti($this->iterableToArray($keys)) as $result) {
             if ($result === false) {
                 return false;
@@ -115,6 +121,7 @@ final class Memcached implements CacheInterface
 
     public function has($key): bool
     {
+        $this->validateKey($key);
         $this->cache->get($key);
         return $this->cache->getResultCode() === \Memcached::RES_SUCCESS;
     }
@@ -241,6 +248,29 @@ final class Memcached implements CacheInterface
             if (!is_array($server) || !isset($server[0], $server[1])) {
                 throw new CacheException('Each entry in servers parameter is supposed to be an array containing hostname, port, and, optionally, weight of the server.');
             }
+        }
+    }
+
+    /**
+     * Checks whether key is a legal value or not
+     * @param mixed $key Key or array of keys ([key1, key2] or [key1 => val1, key2 => val2]) to be validated
+     * @param bool $multiple Set to true if $key is an array of the following format [key1, key2]
+     * @param bool $withValues Set to true if $key is an array of the following format [key1 => val1, key2 => val2]
+     */
+    private function validateKey($key, $multiple = false, $withValues = false): void
+    {
+        if ($multiple && !is_iterable($key)) {
+            throw new InvalidArgumentException('Invalid $key value.');
+        }
+        if ($multiple && !$withValues) {
+            foreach ($key as $item) {
+                if (!\is_string($item) && !\is_int($item)) {
+                    throw new InvalidArgumentException('Invalid $key value.');
+                }
+            }
+        }
+        if (!$multiple && !\is_string($key)) {
+            throw new InvalidArgumentException('Invalid $key value.');
         }
     }
 }

@@ -492,4 +492,67 @@ class MemcachedTest extends TestCase
             ],
         ], $memcached->getServerList());
     }
+
+    public function testGetInvalidKey(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $cache = $this->createCacheInstance();
+        $cache->get(1);
+    }
+
+    public function testSetInvalidKey(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $cache = $this->createCacheInstance();
+        $cache->set(1, 1);
+    }
+
+    public function testDeleteInvalidKey(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $cache = $this->createCacheInstance();
+        $cache->delete(1);
+    }
+
+    public function testGetMultipleInvalidKeys(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $cache = $this->createCacheInstance();
+        $cache->getMultiple([true]);
+    }
+
+    public function testGetMultipleInvalidKeysNotIterable(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $cache = $this->createCacheInstance();
+        $cache->getMultiple(1);
+    }
+
+    public function testSetMultipleInvalidKeysNotIterable(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $cache = $this->createCacheInstance();
+        $cache->setMultiple(1);
+    }
+
+    public function testDeleteMultipleInvalidKeys(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $cache = $this->createCacheInstance();
+        $cache->deleteMultiple([true]);
+    }
+
+    public function testDeleteMultipleInvalidKeysNotIterable(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $cache = $this->createCacheInstance();
+        $cache->deleteMultiple(1);
+    }
+
+    public function testHasInvalidKey(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $cache = $this->createCacheInstance();
+        $cache->has(1);
+    }
 }
