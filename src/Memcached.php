@@ -91,9 +91,10 @@ final class Memcached implements CacheInterface
 
     public function getMultiple($keys, $default = null): iterable
     {
-        $this->validateKey($keys, true);
-        $valuesFromCache = $this->cache->getMulti($this->iterableToArray($keys));
-        $values = array_fill_keys($this->iterableToArray($keys), $default);
+        $keys = $this->iterableToArray($keys);
+        $this->validateKeys($keys);
+        $valuesFromCache = $this->cache->getMulti($keys);
+        $values = array_fill_keys($keys, $default);
         foreach ($values as $key => $value) {
             $values[$key] = $valuesFromCache[$key] ?? $value;
         }
@@ -103,15 +104,17 @@ final class Memcached implements CacheInterface
 
     public function setMultiple($values, $ttl = null): bool
     {
-        $this->validateKey($values, true, true);
+        $values = $this->iterableToArray($values);
+        $this->validateKeysOfValues($values);
         $expiration = $this->ttlToExpiration($ttl);
-        return $this->cache->setMulti($this->iterableToArray($values), $expiration);
+        return $this->cache->setMulti($values, $expiration);
     }
 
     public function deleteMultiple($keys): bool
     {
-        $this->validateKey($keys, true);
-        foreach ($this->cache->deleteMulti($this->iterableToArray($keys)) as $result) {
+        $keys = $this->iterableToArray($keys);
+        $this->validateKeys($keys);
+        foreach ($this->cache->deleteMulti($keys) as $result) {
             if ($result === false) {
                 return false;
             }
@@ -184,12 +187,16 @@ final class Memcached implements CacheInterface
     }
 
     /**
-     * Converts iterable to array
-     * @param iterable $iterable
+     * Converts iterable to array. If provided value is not iterable it throws an InvalidArgumentException
+     * @param $iterable
      * @return array
      */
-    private function iterableToArray(iterable $iterable): array
+    private function iterableToArray($iterable): array
     {
+        if (!is_iterable($iterable)) {
+            throw new InvalidArgumentException('Iterable is expected, got ' . gettype($iterable));
+        }
+
         return $iterable instanceof \Traversable ? iterator_to_array($iterable) : (array)$iterable;
     }
 
@@ -252,25 +259,31 @@ final class Memcached implements CacheInterface
     }
 
     /**
-     * Checks whether key is a legal value or not
-     * @param mixed $key Key or array of keys ([key1, key2] or [key1 => val1, key2 => val2]) to be validated
-     * @param bool $multiple Set to true if $key is an array of the following format [key1, key2]
-     * @param bool $withValues Set to true if $key is an array of the following format [key1 => val1, key2 => val2]
+     * @param $key
      */
-    private function validateKey($key, $multiple = false, $withValues = false): void
+    private function validateKey($key): void
     {
-        if ($multiple && !is_iterable($key)) {
-            throw new InvalidArgumentException('Invalid $key value.');
+        if (!\is_string($key)) {
+            throw new InvalidArgumentException('Invalid key value.');
         }
-        if ($multiple && !$withValues) {
-            foreach ($key as $item) {
-                if (!\is_string($item) && !\is_int($item)) {
-                    throw new InvalidArgumentException('Invalid $key value.');
-                }
-            }
+    }
+
+    /**
+     * @param $keys
+     */
+    private function validateKeys($keys): void
+    {
+        foreach ($keys as $key) {
+            $this->validateKey($key);
         }
-        if (!$multiple && !\is_string($key)) {
-            throw new InvalidArgumentException('Invalid $key value.');
-        }
+    }
+
+    /**
+     * @param $values
+     */
+    private function validateKeysOfValues($values): void
+    {
+        $keys = array_map('strval', array_keys($values));
+        $this->validateKeys($keys);
     }
 }
