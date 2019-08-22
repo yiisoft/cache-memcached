@@ -269,9 +269,9 @@ final class Memcached implements CacheInterface
     }
 
     /**
-     * @param $keys
+     * @param array $keys
      */
-    private function validateKeys($keys): void
+    private function validateKeys(array $keys): void
     {
         foreach ($keys as $key) {
             $this->validateKey($key);
@@ -279,9 +279,9 @@ final class Memcached implements CacheInterface
     }
 
     /**
-     * @param $values
+     * @param array $values
      */
-    private function validateKeysOfValues($values): void
+    private function validateKeysOfValues(array $values): void
     {
         $keys = array_map('strval', array_keys($values));
         $this->validateKeys($keys);
