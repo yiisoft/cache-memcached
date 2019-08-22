@@ -350,7 +350,7 @@ class MemcachedTest extends TestCase
     public function iterableProvider(): array
     {
         return [
-            /*'array' => [
+            'array' => [
                 ['a' => 1, 'b' => 2,],
                 ['a' => 1, 'b' => 2,],
             ],
@@ -367,7 +367,7 @@ class MemcachedTest extends TestCase
                         return new \ArrayIterator(['a' => 1, 'b' => 2,]);
                     }
                 }
-            ],*/
+            ],
             'generator' => [
                 ['a' => 1, 'b' => 2,],
                 (static function () {
