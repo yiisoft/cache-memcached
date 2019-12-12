@@ -150,20 +150,27 @@ final class Memcached implements CacheInterface
      * Converts TTL to expiration
      * @param int|DateInterval|null $ttl
      * @return int
+     *
+     * @see https://github.com/yiisoft/yii2/issues/17710
+     * @see https://secure.php.net/manual/en/memcached.expiration.php
      */
     private function ttlToExpiration($ttl): int
     {
         $ttl = $this->normalizeTtl($ttl);
 
         if ($ttl === null) {
-            $expiration = static::EXPIRATION_INFINITY;
-        } elseif ($ttl <= 0) {
-            $expiration = static::EXPIRATION_EXPIRED;
-        } else {
-            $expiration = $ttl + time();
+            return static::EXPIRATION_INFINITY;
         }
 
-        return $expiration;
+        if ($ttl <= 0) {
+            return static::EXPIRATION_EXPIRED;
+        }
+
+        if ($ttl < 2592001) {
+            return $ttl;
+        }
+
+        return $ttl + time();
     }
 
     /**
