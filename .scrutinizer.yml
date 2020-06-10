@@ -1,6 +1,8 @@
 build:
     environment:
-        memcached: true
+        php:
+            pecl_extensions:
+                - memcached
     nodes:
         analysis:
             tests:
