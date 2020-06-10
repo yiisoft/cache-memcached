@@ -1,4 +1,6 @@
 build:
+    environment:
+        memcached: true
     nodes:
         analysis:
             tests:
