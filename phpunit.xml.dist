@@ -6,8 +6,6 @@
          colors="true"
          verbose="true"
          bootstrap="./tests/bootstrap.php"
-         failOnRisky="true"
-         failOnWarning="true"
 >
     <php>
         <ini name="error_reporting" value="-1" />
