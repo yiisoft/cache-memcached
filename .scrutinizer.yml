@@ -1,6 +1,7 @@
 build:
     environment:
         php:
+            version: "7.0"
             pecl_extensions:
                 - memcached
     nodes:
