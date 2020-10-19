@@ -26,7 +26,7 @@
     "require-dev": {
         "infection/infection": "^0.16.3",
         "phpunit/phpunit": "^9.3",
-        "phan/phan": "^3.0"
+        "vimeo/psalm": "^3.17"
     },
     "autoload": {
         "psr-4": {

@@ -31,7 +31,7 @@ final class Memcached implements CacheInterface
     /**
      * @var \Memcached the Memcached instance
      */
-    private $cache;
+    private \Memcached $cache;
 
     /**
      * @var string an ID that identifies a Memcached instance.
@@ -40,7 +40,7 @@ final class Memcached implements CacheInterface
      * same ID will share the same connection.
      * @see https://www.php.net/manual/en/memcached.construct.php
      */
-    private $persistentId;
+    private string $persistentId;
 
     /**
      * @param string $persistentId By default the Memcached instances are destroyed at the end of the request. To create an
@@ -198,6 +198,7 @@ final class Memcached implements CacheInterface
     /**
      * Converts iterable to array. If provided value is not iterable it throws an InvalidArgumentException
      * @param $iterable
+     * @throws InvalidArgumentException
      * @return array
      */
     private function iterableToArray($iterable): array
