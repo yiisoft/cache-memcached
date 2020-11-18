@@ -25,7 +25,7 @@
     },
     "require-dev": {
         "infection/infection": "^0.16.3 || ^0.18.0",
-        "phpunit/phpunit": "^9.3",
+        "phpunit/phpunit": "^9.4",
         "phan/phan": "^3.0"
     },
     "autoload": {
