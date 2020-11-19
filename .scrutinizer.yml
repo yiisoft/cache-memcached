@@ -11,6 +11,10 @@ build:
             environment:
                 php: 7.4.12
 
+            dependencies:
+                override:
+                    - pecl install memcached
+
             tests:
                 override:
                     - php-scrutinizer-run
