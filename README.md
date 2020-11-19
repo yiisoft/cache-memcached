@@ -15,7 +15,6 @@ This library provides the Memcached handler for the [yiisoft/cache] library.
 [![Build status](https://github.com/yiisoft/cache-memcached/workflows/build/badge.svg)](https://github.com/yiisoft/cache-memcached/actions?query=workflow%3Abuild)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/yiisoft/cache-memcached/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/yiisoft/cache-memcached/?branch=master)
 [![Code Coverage](https://scrutinizer-ci.com/g/yiisoft/cache-memcached/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/yiisoft/cache-memcached/?branch=master)
-[![Mutation testing badge](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fyiisoft%2Fcache-memcached%2Fmaster)](https://dashboard.stryker-mutator.io/reports/github.com/yiisoft/cache-memcached/master)
 [![static analysis](https://github.com/yiisoft/cache-memcached/workflows/static%20analysis/badge.svg)](https://github.com/yiisoft/cache-memcached/actions?query=workflow%3A%22static+analysis%22)
 [![type-coverage](https://shepherd.dev/github/yiisoft/cache-memcached/coverage.svg)](https://shepherd.dev/github/yiisoft/cache-memcached)
 
