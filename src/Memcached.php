@@ -38,6 +38,7 @@ final class Memcached implements CacheInterface
      * By default the Memcached instances are destroyed at the end of the request. To create an instance that
      * persists between requests, you may specify a unique ID for the instance. All instances created with the
      * same ID will share the same connection.
+     *
      * @see https://www.php.net/manual/en/memcached.construct.php
      */
     private $persistentId;
@@ -47,6 +48,7 @@ final class Memcached implements CacheInterface
      * instance that persists between requests, use persistent_id to specify a unique ID for the instance. All instances
      * created with the same persistent_id will share the same connection.
      * @param array $servers list of memcached servers that will be added to the server pool
+     *
      * @see https://www.php.net/manual/en/memcached.construct.php
      * @see https://www.php.net/manual/en/memcached.addservers.php
      */
@@ -133,6 +135,7 @@ final class Memcached implements CacheInterface
 
     /**
      * Returns underlying \Memcached instance
+     *
      * @return \Memcached
      */
     public function getCache(): \Memcached
@@ -150,7 +153,9 @@ final class Memcached implements CacheInterface
 
     /**
      * Converts TTL to expiration
-     * @param int|DateInterval|null $ttl
+     *
+     * @param DateInterval|int|null $ttl
+     *
      * @return int
      *
      * @see https://github.com/yiisoft/yii2/issues/17710
@@ -161,11 +166,11 @@ final class Memcached implements CacheInterface
         $ttl = $this->normalizeTtl($ttl);
 
         if ($ttl === null) {
-            return static::EXPIRATION_INFINITY;
+            return self::EXPIRATION_INFINITY;
         }
 
         if ($ttl <= 0) {
-            return static::EXPIRATION_EXPIRED;
+            return self::EXPIRATION_EXPIRED;
         }
 
         if ($ttl < 2592001) {
@@ -179,7 +184,9 @@ final class Memcached implements CacheInterface
      * @noinspection PhpDocMissingThrowsInspection DateTime won't throw exception because constant string is passed as time
      *
      * Normalizes cache TTL handling strings and {@see DateInterval} objects.
-     * @param int|string|DateInterval|null $ttl raw TTL.
+     *
+     * @param DateInterval|int|string|null $ttl raw TTL.
+     *
      * @return int|null TTL value as UNIX timestamp or null meaning infinity
      */
     private function normalizeTtl($ttl): ?int
@@ -197,7 +204,9 @@ final class Memcached implements CacheInterface
 
     /**
      * Converts iterable to array. If provided value is not iterable it throws an InvalidArgumentException
+     *
      * @param $iterable
+     *
      * @return array
      */
     private function iterableToArray($iterable): array
@@ -233,7 +242,9 @@ final class Memcached implements CacheInterface
 
     /**
      * Returns the list of the servers that are not in the pool.
+     *
      * @param array $servers
+     *
      * @return array
      */
     private function getNewServers(array $servers): array
@@ -256,6 +267,7 @@ final class Memcached implements CacheInterface
 
     /**
      * Validates servers format
+     *
      * @param array $servers
      */
     private function validateServers(array $servers): void

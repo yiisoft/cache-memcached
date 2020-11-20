@@ -75,8 +75,10 @@ class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProvider
+     *
      * @param $key
      * @param $value
+     *
      * @throws InvalidArgumentException
      */
     public function testSet($key, $value): void
@@ -91,8 +93,10 @@ class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProvider
+     *
      * @param $key
      * @param $value
+     *
      * @throws InvalidArgumentException
      */
     public function testGet($key, $value): void
@@ -108,8 +112,10 @@ class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProvider
+     *
      * @param $key
      * @param $value
+     *
      * @throws InvalidArgumentException
      */
     public function testValueInCacheCannotBeChanged($key, $value): void
@@ -133,8 +139,10 @@ class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProvider
+     *
      * @param $key
      * @param $value
+     *
      * @throws InvalidArgumentException
      */
     public function testHas($key, $value): void
@@ -162,8 +170,10 @@ class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProvider
+     *
      * @param $key
      * @param $value
+     *
      * @throws InvalidArgumentException
      */
     public function testDelete($key, $value): void
@@ -180,8 +190,10 @@ class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProvider
+     *
      * @param $key
      * @param $value
+     *
      * @throws InvalidArgumentException
      */
     public function testClear($key, $value): void
@@ -195,7 +207,9 @@ class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProviderSetMultiple
+     *
      * @param int|null $ttl
+     *
      * @throws InvalidArgumentException
      */
     public function testSetMultiple(?int $ttl): void
@@ -279,8 +293,10 @@ class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProviderNormalizeTtl
+     *
      * @param mixed $ttl
      * @param mixed $expectedResult
+     *
      * @throws ReflectionException
      */
     public function testNormalizeTtl($ttl, $expectedResult): void
@@ -291,9 +307,10 @@ class MemcachedTest extends TestCase
 
     /**
      * Data provider for {@see testNormalizeTtl()}
-     * @return array test data
      *
      * @throws \Exception
+     *
+     * @return array test data
      */
     public function dataProviderNormalizeTtl(): array
     {
@@ -310,8 +327,10 @@ class MemcachedTest extends TestCase
 
     /**
      * @dataProvider ttlToExpirationProvider
+     *
      * @param mixed $ttl
      * @param mixed $expected
+     *
      * @throws ReflectionException
      */
     public function testTtlToExpiration($ttl, $expected): void
@@ -335,8 +354,10 @@ class MemcachedTest extends TestCase
 
     /**
      * @dataProvider iterableProvider
+     *
      * @param array $array
      * @param iterable $iterable
+     *
      * @throws InvalidArgumentException
      */
     public function testValuesAsIterable(array $array, iterable $iterable): void
@@ -367,15 +388,15 @@ class MemcachedTest extends TestCase
                     {
                         return new \ArrayIterator(['a' => 1, 'b' => 2,]);
                     }
-                }
+                },
             ],
             'generator' => [
                 ['a' => 1, 'b' => 2,],
                 (static function () {
                     yield 'a' => 1;
                     yield 'b' => 2;
-                })()
-            ]
+                })(),
+            ],
         ];
     }
 
@@ -440,6 +461,7 @@ class MemcachedTest extends TestCase
 
     /**
      * @dataProvider invalidServersConfigProvider
+     *
      * @param $servers
      */
     public function testInvalidServersConfig($servers): void
