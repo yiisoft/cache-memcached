@@ -12,6 +12,9 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
+    env:
+      extensions: memcached
+
     strategy:
       matrix:
         os:
@@ -30,7 +33,7 @@ jobs:
           php-version: "${{ matrix.php }}"
           ini-values: memory_limit=-1
           coverage: "pcov"
-          tools: composer:v2
+          tools: composer:v2, pecl
 
       - name: Determine composer cache directory
         run: echo "COMPOSER_CACHE_DIR=$(composer config cache-dir)" >> $GITHUB_ENV
