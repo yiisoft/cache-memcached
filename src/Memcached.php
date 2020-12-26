@@ -7,10 +7,23 @@ namespace Yiisoft\Cache\Memcached;
 use DateInterval;
 use DateTime;
 use Psr\SimpleCache\CacheInterface;
+use Traversable;
+
+use function array_fill_keys;
+use function array_key_exists;
+use function array_keys;
+use function array_map;
+use function gettype;
+use function is_array;
+use function is_iterable;
+use function is_string;
+use function iterator_to_array;
+use function strpbrk;
+use function time;
 
 /**
- * Memcached implements a cache application component based on [memcached](http://pecl.php.net/package/memcached) PECL
- * extension.
+ * Memcached implements a cache application component based on
+ * [memcached](http://pecl.php.net/package/memcached) PECL extension.
  *
  * Memcached can be configured with a list of memcached servers passed to the constructor.
  * By default, Memcached assumes there is a memcached server running on localhost at port 11211.
@@ -25,39 +38,29 @@ final class Memcached implements CacheInterface
     public const DEFAULT_SERVER_HOST = '127.0.0.1';
     public const DEFAULT_SERVER_PORT = 11211;
     public const DEFAULT_SERVER_WEIGHT = 1;
-    private const EXPIRATION_INFINITY = 0;
-    private const EXPIRATION_EXPIRED = -1;
+
+    private const TTL_INFINITY = 0;
+    private const TTL_EXPIRED = -1;
 
     /**
-     * @var \Memcached the Memcached instance
+     * @var \Memcached The Memcached instance.
      */
-    private $cache;
+    private \Memcached $cache;
 
     /**
-     * @var string an ID that identifies a Memcached instance.
-     * By default the Memcached instances are destroyed at the end of the request. To create an instance that
-     * persists between requests, you may specify a unique ID for the instance. All instances created with the
-     * same ID will share the same connection.
-     *
-     * @see https://www.php.net/manual/en/memcached.construct.php
-     */
-    private $persistentId;
-
-    /**
-     * @param string $persistentId By default the Memcached instances are destroyed at the end of the request. To create an
-     * instance that persists between requests, use persistent_id to specify a unique ID for the instance. All instances
-     * created with the same persistent_id will share the same connection.
-     * @param array $servers list of memcached servers that will be added to the server pool
+     * @param string $persistentId ID that identifies a Memcached instance.
+     * By default the Memcached instances are destroyed at the end of the request.
+     * To create an instance that persists between requests, use persistent_id to specify a unique ID for the instance.
+     * All instances created with the same persistent_id will share the same connection.
+     * @param array $servers List of memcached servers that will be added to the server pool.
      *
      * @see https://www.php.net/manual/en/memcached.construct.php
      * @see https://www.php.net/manual/en/memcached.addservers.php
      */
     public function __construct(string $persistentId = '', array $servers = [])
     {
-        $this->validateServers($servers);
-        $this->persistentId = $persistentId;
-        $this->initCache();
-        $this->initServers($servers);
+        $this->cache = new \Memcached($persistentId);
+        $this->initServers($servers, $persistentId);
     }
 
     public function get($key, $default = null)
@@ -75,11 +78,13 @@ final class Memcached implements CacheInterface
     public function set($key, $value, $ttl = null): bool
     {
         $this->validateKey($key);
-        $expiration = $this->ttlToExpiration($ttl);
-        if ($expiration < 0) {
+        $ttl = $this->normalizeTtl($ttl);
+
+        if ($ttl <= self::TTL_EXPIRED) {
             return $this->delete($key);
         }
-        return $this->cache->set($key, $value, $expiration);
+
+        return $this->cache->set($key, $value, $ttl);
     }
 
     public function delete($key): bool
@@ -97,8 +102,9 @@ final class Memcached implements CacheInterface
     {
         $keys = $this->iterableToArray($keys);
         $this->validateKeys($keys);
-        $valuesFromCache = $this->cache->getMulti($keys);
         $values = array_fill_keys($keys, $default);
+        $valuesFromCache = $this->cache->getMulti($keys);
+
         foreach ($values as $key => $value) {
             $values[$key] = $valuesFromCache[$key] ?? $value;
         }
@@ -110,19 +116,20 @@ final class Memcached implements CacheInterface
     {
         $values = $this->iterableToArray($values);
         $this->validateKeysOfValues($values);
-        $expiration = $this->ttlToExpiration($ttl);
-        return $this->cache->setMulti($values, $expiration);
+        return $this->cache->setMulti($values, $this->normalizeTtl($ttl));
     }
 
     public function deleteMultiple($keys): bool
     {
         $keys = $this->iterableToArray($keys);
         $this->validateKeys($keys);
+
         foreach ($this->cache->deleteMulti($keys) as $result) {
             if ($result === false) {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -134,78 +141,37 @@ final class Memcached implements CacheInterface
     }
 
     /**
-     * Returns underlying \Memcached instance
+     * Normalizes cache TTL handling `null` value, strings and {@see DateInterval} objects.
      *
-     * @return \Memcached
-     */
-    public function getCache(): \Memcached
-    {
-        return $this->cache;
-    }
-
-    /**
-     * Inits Memcached instance
-     */
-    private function initCache(): void
-    {
-        $this->cache = new \Memcached($this->persistentId);
-    }
-
-    /**
-     * Converts TTL to expiration
+     * @param DateInterval|int|string|null $ttl The raw TTL.
      *
-     * @param DateInterval|int|null $ttl
+     * @return int TTL value as UNIX timestamp.
      *
-     * @return int
-     *
-     * @see https://github.com/yiisoft/yii2/issues/17710
      * @see https://secure.php.net/manual/en/memcached.expiration.php
      */
-    private function ttlToExpiration($ttl): int
+    private function normalizeTtl($ttl): int
     {
-        $ttl = $this->normalizeTtl($ttl);
-
         if ($ttl === null) {
-            return self::EXPIRATION_INFINITY;
+            return self::TTL_INFINITY;
         }
 
-        if ($ttl <= 0) {
-            return self::EXPIRATION_EXPIRED;
-        }
-
-        if ($ttl < 2592001) {
-            return $ttl;
-        }
-
-        return $ttl + time();
-    }
-
-    /**
-     * @noinspection PhpDocMissingThrowsInspection DateTime won't throw exception because constant string is passed as time
-     *
-     * Normalizes cache TTL handling strings and {@see DateInterval} objects.
-     *
-     * @param DateInterval|int|string|null $ttl raw TTL.
-     *
-     * @return int|null TTL value as UNIX timestamp or null meaning infinity
-     */
-    private function normalizeTtl($ttl): ?int
-    {
         if ($ttl instanceof DateInterval) {
-            return (new DateTime('@0'))->add($ttl)->getTimestamp();
+            $ttl = (new DateTime('@0'))->add($ttl)->getTimestamp();
         }
 
-        if (is_string($ttl)) {
-            return (int)$ttl;
+        $ttl = (int) $ttl;
+
+        if ($ttl > 2592000) {
+            return $ttl + time();
         }
 
-        return $ttl;
+        return $ttl > 0 ? $ttl : self::TTL_EXPIRED;
     }
 
     /**
-     * Converts iterable to array. If provided value is not iterable it throws an InvalidArgumentException
+     * Converts iterable to array. If provided value is not iterable it throws an InvalidArgumentException.
      *
-     * @param $iterable
+     * @param mixed $iterable
      *
      * @return array
      */
@@ -215,27 +181,26 @@ final class Memcached implements CacheInterface
             throw new InvalidArgumentException('Iterable is expected, got ' . gettype($iterable));
         }
 
-        return $iterable instanceof \Traversable ? iterator_to_array($iterable) : (array)$iterable;
+        /** @psalm-suppress RedundantCast */
+        return $iterable instanceof Traversable ? iterator_to_array($iterable) : (array) $iterable;
     }
 
     /**
      * @param array $servers
+     * @param string $persistentId
+     *
+     * @throws CacheException If an error occurred when adding servers to the server pool.
+     * @throws InvalidArgumentException If the servers format is incorrect.
      */
-    private function initServers(array $servers): void
+    private function initServers(array $servers, string $persistentId): void
     {
-        if ($servers === []) {
-            $servers = [
-                [self::DEFAULT_SERVER_HOST, self::DEFAULT_SERVER_PORT, self::DEFAULT_SERVER_WEIGHT],
-            ];
-        }
+        $servers = $this->normalizeServers($servers);
 
-        if ($this->persistentId !== '') {
+        if ($persistentId !== '') {
             $servers = $this->getNewServers($servers);
         }
 
-        $success = $this->cache->addServers($servers);
-
-        if (!$success) {
+        if (!$this->cache->addServers($servers)) {
             throw new CacheException('An error occurred while adding servers to the server pool.');
         }
     }
@@ -250,14 +215,14 @@ final class Memcached implements CacheInterface
     private function getNewServers(array $servers): array
     {
         $existingServers = [];
+        $newServers = [];
+
         foreach ($this->cache->getServerList() as $existingServer) {
-            $existingServers[$existingServer['host'] . ':' . $existingServer['port']] = true;
+            $existingServers["{$existingServer['host']}:{$existingServer['port']}"] = true;
         }
 
-        $newServers = [];
         foreach ($servers as $server) {
-            $serverAddress = $server[0] . ':' . $server[1];
-            if (!array_key_exists($serverAddress, $existingServers)) {
+            if (!array_key_exists("{$server[0]}:{$server[1]}", $existingServers)) {
                 $newServers[] = $server;
             }
         }
@@ -266,25 +231,38 @@ final class Memcached implements CacheInterface
     }
 
     /**
-     * Validates servers format
+     * Validates and normalizes the format of the servers.
      *
-     * @param array $servers
+     * @param array $servers The raw servers.
+     *
+     * @throws InvalidArgumentException If the servers format is incorrect.
+     *
+     * @return array The normalized servers.
      */
-    private function validateServers(array $servers): void
+    private function normalizeServers(array $servers): array
     {
+        $normalized = [];
+
         foreach ($servers as $server) {
-            if (!is_array($server) || !isset($server[0], $server[1])) {
-                throw new CacheException('Each entry in servers parameter is supposed to be an array containing hostname, port, and, optionally, weight of the server.');
+            if (!is_array($server) || !isset($server['host'], $server['port'])) {
+                throw new InvalidArgumentException(
+                    'Each entry in servers parameter is supposed to be an array'
+                    . ' containing hostname, port, and, optionally, weight of the server.',
+                );
             }
+
+            $normalized[] = [$server['host'], $server['port'], $server['weight'] ?? self::DEFAULT_SERVER_WEIGHT];
         }
+
+        return $normalized ?: [[self::DEFAULT_SERVER_HOST, self::DEFAULT_SERVER_PORT, self::DEFAULT_SERVER_WEIGHT]];
     }
 
     /**
-     * @param $key
+     * @param mixed $key
      */
     private function validateKey($key): void
     {
-        if (!\is_string($key) || strpbrk($key, '{}()/\@:')) {
+        if (!is_string($key) || $key === '' || strpbrk($key, '{}()/\@:')) {
             throw new InvalidArgumentException('Invalid key value.');
         }
     }
