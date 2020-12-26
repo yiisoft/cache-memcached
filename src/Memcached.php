@@ -48,9 +48,9 @@ final class Memcached implements CacheInterface
     private \Memcached $cache;
 
     /**
-     * @param string $persistentId ID that identifies a Memcached instance.
-     * By default the Memcached instances are destroyed at the end of the request.
-     * To create an instance that persists between requests, use persistent_id to specify a unique ID for the instance.
+     * @param string $persistentId The ID that identifies the Memcached instance.
+     * By default, the Memcached instances are destroyed at the end of the request.
+     * To create an instance that persists between requests, use `persistentId` to specify a unique ID for the instance.
      * All instances created with the same persistent_id will share the same connection.
      * @param array $servers List of memcached servers that will be added to the server pool.
      *
