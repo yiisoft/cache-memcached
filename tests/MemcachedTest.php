@@ -4,17 +4,29 @@ declare(strict_types=1);
 
 namespace Yiisoft\Cache\Memcached\Tests;
 
-require_once __DIR__ . '/MockHelper.php';
-
+use ArrayIterator;
 use DateInterval;
+use Exception;
+use IteratorAggregate;
+use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
+use ReflectionClass;
+use ReflectionObject;
+use stdClass;
 use Yiisoft\Cache\Memcached\CacheException;
 use Yiisoft\Cache\Memcached\Memcached;
-use Yiisoft\Cache\Memcached\MockHelper;
 
-class MemcachedTest extends TestCase
+use function array_keys;
+use function array_map;
+use function extension_loaded;
+use function is_array;
+use function is_object;
+use function stream_socket_client;
+use function time;
+
+final class MemcachedTest extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -28,49 +40,25 @@ class MemcachedTest extends TestCase
         }
     }
 
-    protected function tearDown(): void
+    public function dataProvider(): array
     {
-        MockHelper::$time = null;
-    }
+        $object = new stdClass();
+        $object->test_field = 'test_value';
 
-    protected function createCacheInstance($persistentId = '', array $servers = []): CacheInterface
-    {
-        if ($servers === []) {
-            $servers = [[MEMCACHED_HOST, MEMCACHED_PORT]];
-        }
-        return new Memcached($persistentId, $servers);
-    }
-
-    public function testDeleteMultipleReturnsFalse(): void
-    {
-        $cache = $this->createCacheInstance();
-
-        $memcachedStub = $this->createMock(\Memcached::class);
-        $memcachedStub->method('deleteMulti')->willReturn([false]);
-
-        $this->setInaccessibleProperty($cache, 'cache', $memcachedStub);
-
-        $this->assertFalse($cache->deleteMultiple(['a', 'b']));
-    }
-
-    public function testExpire(): void
-    {
-        $ttl = 2;
-        MockHelper::$time = \time();
-        $expiration = MockHelper::$time + $ttl;
-
-        $cache = $this->createCacheInstance();
-
-        $memcached = $this->createMock(\Memcached::class);
-
-        $memcached->expects($this->once())
-            ->method('set')
-            ->with($this->equalTo('key'), $this->equalTo('value'), $this->equalTo($expiration))
-            ->willReturn(true);
-
-        $this->setInaccessibleProperty($cache, 'cache', $memcached);
-
-        $cache->set('key', 'value', $ttl);
+        return [
+            'integer' => ['test_integer', 1],
+            'double' => ['test_double', 1.1],
+            'string' => ['test_string', 'a'],
+            'boolean_true' => ['test_boolean_true', true],
+            'boolean_false' => ['test_boolean_false', false],
+            'object' => ['test_object', $object],
+            'array' => ['test_array', ['test_key' => 'test_value']],
+            'null' => ['test_null', null],
+            'supported_key_characters' => ['AZaz09_.', 'b'],
+            '64_characters_key_max' => ['bVGEIeslJXtDPrtK.hgo6HL25_.1BGmzo4VA25YKHveHh7v9tUP8r5BNCyLhx4zy', 'c'],
+            'string_with_number_key' => ['111', 11],
+            'string_with_number_key_1' => ['022', 22],
+        ];
     }
 
     /**
@@ -84,7 +72,6 @@ class MemcachedTest extends TestCase
     public function testSet($key, $value): void
     {
         $cache = $this->createCacheInstance();
-        $cache->clear();
 
         for ($i = 0; $i < 2; $i++) {
             $this->assertTrue($cache->set($key, $value));
@@ -102,8 +89,6 @@ class MemcachedTest extends TestCase
     public function testGet($key, $value): void
     {
         $cache = $this->createCacheInstance();
-        $cache->clear();
-
         $cache->set($key, $value);
         $valueFromCache = $cache->get($key, 'default');
 
@@ -121,8 +106,6 @@ class MemcachedTest extends TestCase
     public function testValueInCacheCannotBeChanged($key, $value): void
     {
         $cache = $this->createCacheInstance();
-        $cache->clear();
-
         $cache->set($key, $value);
         $valueFromCache = $cache->get($key, 'default');
 
@@ -148,8 +131,6 @@ class MemcachedTest extends TestCase
     public function testHas($key, $value): void
     {
         $cache = $this->createCacheInstance();
-        $cache->clear();
-
         $cache->set($key, $value);
 
         $this->assertTrue($cache->has($key));
@@ -163,7 +144,6 @@ class MemcachedTest extends TestCase
     public function testGetNonExistent(): void
     {
         $cache = $this->createCacheInstance();
-        $cache->clear();
 
         $this->assertNull($cache->get('non_existent_key'));
     }
@@ -179,8 +159,6 @@ class MemcachedTest extends TestCase
     public function testDelete($key, $value): void
     {
         $cache = $this->createCacheInstance();
-        $cache->clear();
-
         $cache->set($key, $value);
 
         $this->assertSameExceptObject($value, $cache->get($key));
@@ -199,7 +177,10 @@ class MemcachedTest extends TestCase
     public function testClear($key, $value): void
     {
         $cache = $this->createCacheInstance();
-        $cache = $this->prepare($cache);
+
+        foreach ($this->dataProvider() as $datum) {
+            $cache->set($datum[0], $datum[1]);
+        }
 
         $this->assertTrue($cache->clear());
         $this->assertNull($cache->get($key));
@@ -215,14 +196,11 @@ class MemcachedTest extends TestCase
     public function testSetMultiple(?int $ttl): void
     {
         $cache = $this->createCacheInstance();
-        $cache->clear();
-
         $data = $this->getDataProviderData();
-
         $cache->setMultiple($data, $ttl);
 
         foreach ($data as $key => $value) {
-            $this->assertSameExceptObject($value, $cache->get((string)$key));
+            $this->assertSameExceptObject($value, $cache->get((string) $key));
         }
     }
 
@@ -231,19 +209,13 @@ class MemcachedTest extends TestCase
      */
     public function dataProviderSetMultiple(): array
     {
-        return [
-            [null],
-            [2],
-        ];
+        return [[null], [2]];
     }
 
     public function testGetMultiple(): void
     {
         $cache = $this->createCacheInstance();
-        $cache->clear();
-
         $data = $this->getDataProviderData();
-
         $cache->setMultiple($data);
 
         $this->assertSameExceptObject($data, $cache->getMultiple(array_map('strval', array_keys($data))));
@@ -252,43 +224,80 @@ class MemcachedTest extends TestCase
     public function testDeleteMultiple(): void
     {
         $cache = $this->createCacheInstance();
-        $cache->clear();
-
         $data = $this->getDataProviderData();
         $keys = array_map('strval', array_keys($data));
-
         $cache->setMultiple($data);
 
         $this->assertSameExceptObject($data, $cache->getMultiple($keys));
 
         $cache->deleteMultiple($keys);
-
-        $emptyData = array_map(static function ($v) {
-            return null;
-        }, $data);
+        $emptyData = array_map(static fn () => null, $data);
 
         $this->assertSameExceptObject($emptyData, $cache->getMultiple($keys));
+    }
+
+    public function testDeleteMultipleReturnsFalse(): void
+    {
+        $cache = $this->createCacheInstance();
+
+        $memcachedStub = $this->createMock(\Memcached::class);
+        $memcachedStub->method('deleteMulti')->willReturn([false]);
+
+        $this->setInaccessibleProperty($cache, 'cache', $memcachedStub);
+
+        $this->assertFalse($cache->deleteMultiple(['a', 'b']));
+    }
+
+    public function testExpire(): void
+    {
+        $ttl = 2;
+        $cache = $this->createCacheInstance();
+        $memcached = $this->createMock(\Memcached::class);
+
+        $memcached->expects($this->once())
+            ->method('set')
+            ->with($this->equalTo('key'), $this->equalTo('value'), $this->equalTo($ttl))
+            ->willReturn(true);
+
+        $this->setInaccessibleProperty($cache, 'cache', $memcached);
+        $cache->set('key', 'value', $ttl);
     }
 
     public function testZeroAndNegativeTtl(): void
     {
         $cache = $this->createCacheInstance();
-        $cache->clear();
-        $cache->setMultiple([
-            'a' => 1,
-            'b' => 2,
-        ]);
+        $cache->setMultiple(['a' => 1, 'b' => 2]);
 
         $this->assertTrue($cache->has('a'));
         $this->assertTrue($cache->has('b'));
 
         $cache->set('a', 11, -1);
-
         $this->assertFalse($cache->has('a'));
 
         $cache->set('b', 22, 0);
-
         $this->assertFalse($cache->has('b'));
+    }
+
+    /**
+     * Data provider for {@see testNormalizeTtl()}
+     *
+     * @throws Exception
+     *
+     * @return array test data
+     */
+    public function dataProviderNormalizeTtl(): array
+    {
+        return [
+            [123, 123],
+            ['123', 123],
+            [0, -1],
+            ['', -1],
+            [-1, -1],
+            [-5, -1],
+            [null, 0],
+            [new DateInterval('PT6H8M'), 6 * 3600 + 8 * 60],
+            [new DateInterval('P2Y4D'), 2 * 365 * 24 * 3600 + 4 * 24 * 3600],
+        ];
     }
 
     /**
@@ -302,53 +311,39 @@ class MemcachedTest extends TestCase
     public function testNormalizeTtl($ttl, $expectedResult): void
     {
         $cache = $this->createCacheInstance();
-        $this->assertSameExceptObject($expectedResult, $this->invokeMethod($cache, 'normalizeTtl', [$ttl]));
+        $ttl = $this->invokeMethod($cache, 'normalizeTtl', [$ttl]);
+        $ttl = $ttl < 2592001 ? $ttl : $ttl - time();
+
+        $this->assertSameExceptObject($expectedResult, $ttl);
     }
 
-    /**
-     * Data provider for {@see testNormalizeTtl()}
-     *
-     * @throws \Exception
-     *
-     * @return array test data
-     */
-    public function dataProviderNormalizeTtl(): array
+    public function iterableProvider(): array
     {
         return [
-            [123, 123],
-            ['123', 123],
-            ['', 0],
-            [null, null],
-            [0, 0],
-            [new DateInterval('PT6H8M'), 6 * 3600 + 8 * 60],
-            [new DateInterval('P2Y4D'), 2 * 365 * 24 * 3600 + 4 * 24 * 3600],
-        ];
-    }
-
-    /**
-     * @dataProvider ttlToExpirationProvider
-     *
-     * @param mixed $ttl
-     * @param mixed $expected
-     *
-     * @throws ReflectionException
-     */
-    public function testTtlToExpiration($ttl, $expected): void
-    {
-        if ($expected === 'calculate_expiration') {
-            MockHelper::$time = \time();
-            $expected = MockHelper::$time + $ttl;
-        }
-        $cache = $this->createCacheInstance();
-        $this->assertSameExceptObject($expected, $this->invokeMethod($cache, 'ttlToExpiration', [$ttl]));
-    }
-
-    public function ttlToExpirationProvider(): array
-    {
-        return [
-            [3, 'calculate_expiration'],
-            [null, 0],
-            [-5, -1],
+            'array' => [
+                ['a' => 1, 'b' => 2,],
+                ['a' => 1, 'b' => 2,],
+            ],
+            'ArrayIterator' => [
+                ['a' => 1, 'b' => 2,],
+                new ArrayIterator(['a' => 1, 'b' => 2,]),
+            ],
+            'IteratorAggregate' => [
+                ['a' => 1, 'b' => 2,],
+                new class() implements IteratorAggregate {
+                    public function getIterator()
+                    {
+                        return new ArrayIterator(['a' => 1, 'b' => 2,]);
+                    }
+                },
+            ],
+            'generator' => [
+                ['a' => 1, 'b' => 2,],
+                (static function () {
+                    yield 'a' => 1;
+                    yield 'b' => 2;
+                })(),
+            ],
         ];
     }
 
@@ -363,59 +358,17 @@ class MemcachedTest extends TestCase
     public function testValuesAsIterable(array $array, iterable $iterable): void
     {
         $cache = $this->createCacheInstance();
-        $cache->clear();
-
         $cache->setMultiple($iterable);
 
         $this->assertSameExceptObject($array, $cache->getMultiple(array_keys($array)));
     }
 
-    public function iterableProvider(): array
-    {
-        return [
-            'array' => [
-                ['a' => 1, 'b' => 2,],
-                ['a' => 1, 'b' => 2,],
-            ],
-            'ArrayIterator' => [
-                ['a' => 1, 'b' => 2,],
-                new \ArrayIterator(['a' => 1, 'b' => 2,]),
-            ],
-            'IteratorAggregate' => [
-                ['a' => 1, 'b' => 2,],
-                new class() implements \IteratorAggregate {
-                    public function getIterator()
-                    {
-                        return new \ArrayIterator(['a' => 1, 'b' => 2,]);
-                    }
-                },
-            ],
-            'generator' => [
-                ['a' => 1, 'b' => 2,],
-                (static function () {
-                    yield 'a' => 1;
-                    yield 'b' => 2;
-                })(),
-            ],
-        ];
-    }
-
     public function testGetCache(): void
     {
         $cache = $this->createCacheInstance();
-        $memcached = $cache->getCache();
+        $memcached = $this->getInaccessibleProperty($cache, 'cache');
+
         $this->assertInstanceOf(\Memcached::class, $memcached);
-    }
-
-    public function testPersistentId(): void
-    {
-        $cache1 = $this->createCacheInstance();
-        $memcached1 = $cache1->getCache();
-        $this->assertFalse($memcached1->isPersistent());
-
-        $cache2 = $this->createCacheInstance(microtime() . __METHOD__);
-        $memcached2 = $cache2->getCache();
-        $this->assertTrue($memcached2->isPersistent());
     }
 
     public function testGetNewServers(): void
@@ -440,11 +393,12 @@ class MemcachedTest extends TestCase
     public function testThatServerWeightIsOptional(): void
     {
         $cache = $this->createCacheInstance(microtime() . __METHOD__, [
-            ['1.1.1.1', 11211, 1],
-            ['2.2.2.2', 11211],
+            ['host' =>'1.1.1.1', 'port' => 11211, 'weight' => 1],
+            ['host' =>'2.2.2.2', 'port' => 11211, 'weight' => 1],
         ]);
 
-        $memcached = $cache->getCache();
+        $memcached = $this->getInaccessibleProperty($cache, 'cache');
+
         $this->assertEquals([
             [
                 'host' => '1.1.1.1',
@@ -459,35 +413,27 @@ class MemcachedTest extends TestCase
         ], $memcached->getServerList());
     }
 
-    /**
-     * @dataProvider invalidServersConfigProvider
-     *
-     * @param $servers
-     */
-    public function testInvalidServersConfig($servers): void
-    {
-        $this->expectException(CacheException::class);
-        $cache = $this->createCacheInstance('', $servers);
-    }
-
-    public function invalidServersConfigProvider(): array
-    {
-        return [
-            [[[]]],
-            [[['1.1.1.1']]],
-        ];
-    }
-
     public function testSetWithDateIntervalTtl(): void
     {
         $cache = $this->createCacheInstance();
-        $cache->clear();
-
         $cache->set('a', 1, new DateInterval('PT1H'));
         $this->assertSameExceptObject(1, $cache->get('a'));
 
         $cache->setMultiple(['b' => 2]);
         $this->assertSameExceptObject(['b' => 2], $cache->getMultiple(['b']));
+    }
+
+    public function testInitDefaultServer(): void
+    {
+        $memcached = $this->getInaccessibleProperty(new Memcached(), 'cache');
+
+        $this->assertEquals([
+            [
+                'host' => '127.0.0.1',
+                'port' => 11211,
+                'type' => 'TCP',
+            ],
+        ], $memcached->getServerList());
     }
 
     public function testFailInitServers(): void
@@ -500,83 +446,277 @@ class MemcachedTest extends TestCase
         $memcachedStub->method('addServers')->willReturn(false);
 
         $this->setInaccessibleProperty($cache, 'cache', $memcachedStub);
-
-        $this->invokeMethod($cache, 'initServers', [[]]);
+        $this->invokeMethod($cache, 'initServers', [[], '']);
     }
 
-    public function testInitDefaultServer(): void
+    public function invalidServersConfigProvider(): array
     {
-        $cache = new Memcached();
-        $memcached = $cache->getCache();
-        $this->assertEquals([
-            [
-                'host' => '127.0.0.1',
-                'port' => 11211,
-                'type' => 'TCP',
-            ],
-        ], $memcached->getServerList());
+        return [
+            [[[]]],
+            [[['1.1.1.1']]],
+            [['host' => MEMCACHED_HOST]],
+            [['port' => MEMCACHED_PORT]],
+            [['host' => null, 'port' => MEMCACHED_PORT]],
+            [['host' => MEMCACHED_HOST, 'port' => null]],
+        ];
     }
 
-    public function testGetInvalidKey(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        $cache = $this->createCacheInstance();
-        $cache->get(1);
-    }
-
-    public function testSetInvalidKey(): void
+    /**
+     * @dataProvider invalidServersConfigProvider
+     *
+     * @param $servers
+     */
+    public function testConstructorThrowExceptionForInvalidServersConfig($servers): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $cache = $this->createCacheInstance();
-        $cache->set(1, 1);
+        $this->createCacheInstance('', $servers);
     }
 
-    public function testDeleteInvalidKey(): void
+    public function invalidKeyProvider(): array
     {
-        $this->expectException(InvalidArgumentException::class);
-        $cache = $this->createCacheInstance();
-        $cache->delete(1);
+        return [
+            'int' => [1],
+            'float' => [1.1],
+            'null' => [null],
+            'bool' => [true],
+            'object' => [new stdClass()],
+            'callable' => [fn () => 'key'],
+            'psr-reserved' => ['{}()/\@:'],
+            'empty-string' => [''],
+        ];
     }
 
-    public function testGetMultipleInvalidKeys(): void
+    /**
+     * @dataProvider invalidKeyProvider
+     *
+     * @param mixed $key
+     */
+    public function testGetThrowExceptionForInvalidKey($key): void
     {
-        $this->expectException(InvalidArgumentException::class);
         $cache = $this->createCacheInstance();
-        $cache->getMultiple([true]);
+        $this->expectException(InvalidArgumentException::class);
+        $cache->get($key);
     }
 
-    public function testGetMultipleInvalidKeysNotIterable(): void
+    /**
+     * @dataProvider invalidKeyProvider
+     *
+     * @param mixed $key
+     */
+    public function testSetThrowExceptionForInvalidKey($key): void
     {
-        $this->expectException(InvalidArgumentException::class);
         $cache = $this->createCacheInstance();
-        $cache->getMultiple(1);
+        $this->expectException(InvalidArgumentException::class);
+        $cache->set($key, 'value');
     }
 
-    public function testSetMultipleInvalidKeysNotIterable(): void
+    /**
+     * @dataProvider invalidKeyProvider
+     *
+     * @param mixed $key
+     */
+    public function testDeleteThrowExceptionForInvalidKey($key): void
     {
-        $this->expectException(InvalidArgumentException::class);
         $cache = $this->createCacheInstance();
-        $cache->setMultiple(1);
+        $this->expectException(InvalidArgumentException::class);
+        $cache->delete($key);
     }
 
-    public function testDeleteMultipleInvalidKeys(): void
+    /**
+     * @dataProvider invalidKeyProvider
+     *
+     * @param mixed $key
+     */
+    public function testGetMultipleThrowExceptionForInvalidKeys($key): void
     {
-        $this->expectException(InvalidArgumentException::class);
         $cache = $this->createCacheInstance();
-        $cache->deleteMultiple([true]);
+        $this->expectException(InvalidArgumentException::class);
+        $cache->getMultiple([$key]);
     }
 
-    public function testDeleteMultipleInvalidKeysNotIterable(): void
+    /**
+     * @dataProvider invalidKeyProvider
+     *
+     * @param mixed $key
+     */
+    public function testGetMultipleThrowExceptionForInvalidKeysNotIterable($key): void
     {
-        $this->expectException(InvalidArgumentException::class);
         $cache = $this->createCacheInstance();
-        $cache->deleteMultiple(1);
+        $this->expectException(InvalidArgumentException::class);
+        $cache->getMultiple($key);
     }
 
-    public function testHasInvalidKey(): void
+    /**
+     * @dataProvider invalidKeyProvider
+     *
+     * @param mixed $key
+     */
+    public function testSetMultipleThrowExceptionForInvalidKeysNotIterable($key): void
     {
-        $this->expectException(InvalidArgumentException::class);
         $cache = $this->createCacheInstance();
-        $cache->has(1);
+        $this->expectException(InvalidArgumentException::class);
+        $cache->setMultiple($key);
+    }
+
+    /**
+     * @dataProvider invalidKeyProvider
+     *
+     * @param mixed $key
+     */
+    public function testDeleteMultipleThrowExceptionForInvalidKeys($key): void
+    {
+        $cache = $this->createCacheInstance();
+        $this->expectException(InvalidArgumentException::class);
+        $cache->deleteMultiple([$key]);
+    }
+
+    /**
+     * @dataProvider invalidKeyProvider
+     *
+     * @param mixed $key
+     */
+    public function testDeleteMultipleThrowExceptionForInvalidKeysNotIterable($key): void
+    {
+        $cache = $this->createCacheInstance();
+        $this->expectException(InvalidArgumentException::class);
+        $cache->deleteMultiple($key);
+    }
+
+    /**
+     * @dataProvider invalidKeyProvider
+     *
+     * @param mixed $key
+     */
+    public function testHasInvalidKey($key): void
+    {
+        $cache = $this->createCacheInstance();
+        $this->expectException(InvalidArgumentException::class);
+        $cache->has($key);
+    }
+
+    private function createCacheInstance($persistentId = '', array $servers = []): CacheInterface
+    {
+        if ($servers === []) {
+            $servers[] = ['host' => MEMCACHED_HOST, 'port' => MEMCACHED_PORT];
+        }
+
+        return new Memcached($persistentId, $servers);
+    }
+
+    /**
+     * Invokes a inaccessible method.
+     *
+     * @param $object
+     * @param $method
+     * @param array $args
+     * @param bool $revoke whether to make method inaccessible after execution
+     *
+     * @throws ReflectionException
+     *
+     * @return mixed
+     */
+    private function invokeMethod($object, $method, array $args = [], bool $revoke = true)
+    {
+        $reflection = new ReflectionObject($object);
+        $method = $reflection->getMethod($method);
+        $method->setAccessible(true);
+        $result = $method->invokeArgs($object, $args);
+
+        if ($revoke) {
+            $method->setAccessible(false);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Sets an inaccessible object property to a designated value.
+     *
+     * @param object $object
+     * @param string $propertyName
+     * @param mixed $value
+     * @param bool $revoke whether to make property inaccessible after setting
+     */
+    private function setInaccessibleProperty(object $object, string $propertyName, $value, bool $revoke = true): void
+    {
+        $class = new ReflectionClass($object);
+
+        while (!$class->hasProperty($propertyName)) {
+            $class = $class->getParentClass();
+        }
+
+        $property = $class->getProperty($propertyName);
+        $property->setAccessible(true);
+        $property->setValue($object, $value);
+
+        if ($revoke) {
+            $property->setAccessible(false);
+        }
+    }
+
+    /**
+     * Gets an inaccessible object property.
+     *
+     * @param object $object
+     * @param string $propertyName
+     * @param bool $revoke whether to make property inaccessible after getting
+     *
+     * @return mixed
+     */
+    private function getInaccessibleProperty(object $object, string $propertyName, bool $revoke = true)
+    {
+        $class = new ReflectionClass($object);
+
+        while (!$class->hasProperty($propertyName)) {
+            $class = $class->getParentClass();
+        }
+
+        $property = $class->getProperty($propertyName);
+        $property->setAccessible(true);
+        $result = $property->getValue($object);
+
+        if ($revoke) {
+            $property->setAccessible(false);
+        }
+
+        return $result;
+    }
+
+    private function getDataProviderData(): array
+    {
+        $dataProvider = $this->dataProvider();
+        $data = [];
+
+        foreach ($dataProvider as $item) {
+            $data[$item[0]] = $item[1];
+        }
+
+        return $data;
+    }
+
+    private function assertSameExceptObject($expected, $actual): void
+    {
+        // assert for all types
+        $this->assertEquals($expected, $actual);
+
+        // no more asserts for objects
+        if (is_object($expected)) {
+            return;
+        }
+
+        // asserts same for all types except objects and arrays that can contain objects
+        if (!is_array($expected)) {
+            $this->assertSame($expected, $actual);
+            return;
+        }
+
+        // assert same for each element of the array except objects
+        foreach ($expected as $key => $value) {
+            if (!is_object($value)) {
+                $this->assertSame($expected[$key], $actual[$key]);
+            } else {
+                $this->assertEquals($expected[$key], $actual[$key]);
+            }
+        }
     }
 }
