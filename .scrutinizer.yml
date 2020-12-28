@@ -8,6 +8,12 @@ filter:
 build:
     nodes:
         analysis:
+            services:
+                memcached:
+                    image: memcached:latest
+                    ports:
+                        11211
+
             environment:
                 php: 7.4.12
 
@@ -20,6 +26,12 @@ build:
                     - php-scrutinizer-run
 
         tests-and-coverage:
+            services:
+                memcached:
+                    image: memcached:latest
+                    ports:
+                        11211
+
             environment:
                 php: 7.4.12
 
@@ -37,5 +49,3 @@ build:
                         coverage:
                             file: coverage.xml
                             format: php-clover
-
-
