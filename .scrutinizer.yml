@@ -12,7 +12,7 @@ build:
                 memcached:
                     image: memcached:latest
                     ports:
-                        11211
+                        - 11211
 
             environment:
                 php: 7.4.12
@@ -30,7 +30,7 @@ build:
                 memcached:
                     image: memcached:latest
                     ports:
-                        11211
+                        - 11211
 
             environment:
                 php: 7.4.12
