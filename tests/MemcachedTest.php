@@ -20,6 +20,7 @@ use Yiisoft\Cache\Memcached\Memcached;
 
 use function array_keys;
 use function array_map;
+use function class_exists;
 use function extension_loaded;
 use function is_array;
 use function is_object;
@@ -238,6 +239,10 @@ final class MemcachedTest extends TestCase
 
     public function testDeleteMultipleReturnsFalse(): void
     {
+        if (!class_exists('\Memcached')) {
+            self::markTestSkipped('The "\Memcached" class is not exists.');
+        }
+
         $cache = $this->createCacheInstance();
 
         $memcachedStub = $this->createMock(\Memcached::class);
@@ -250,6 +255,10 @@ final class MemcachedTest extends TestCase
 
     public function testExpire(): void
     {
+        if (!class_exists('\Memcached')) {
+            self::markTestSkipped('The "\Memcached" class is not exists.');
+        }
+
         $ttl = 2;
         $cache = $this->createCacheInstance();
         $memcached = $this->createMock(\Memcached::class);
@@ -373,6 +382,10 @@ final class MemcachedTest extends TestCase
 
     public function testGetNewServers(): void
     {
+        if (!class_exists('\Memcached')) {
+            self::markTestSkipped('The "\Memcached" class is not exists.');
+        }
+
         $cache = $this->createCacheInstance();
 
         $memcachedStub = $this->createMock(\Memcached::class);
@@ -438,6 +451,10 @@ final class MemcachedTest extends TestCase
 
     public function testFailInitServers(): void
     {
+        if (!class_exists('\Memcached')) {
+            self::markTestSkipped('The "\Memcached" class is not exists.');
+        }
+
         $this->expectException(CacheException::class);
 
         $cache = $this->createCacheInstance();
