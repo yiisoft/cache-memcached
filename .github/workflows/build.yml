@@ -44,7 +44,7 @@ jobs:
           coverage: pcov
           tools: composer:v2, pecl
         env:
-          runner: self-hosted
+          runner: ${{ matrix.os }}
 
       - name: Determine composer cache directory on Linux
         if: matrix.os == 'ubuntu-latest'
