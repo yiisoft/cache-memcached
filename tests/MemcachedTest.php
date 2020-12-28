@@ -25,9 +25,6 @@ use function is_array;
 use function is_object;
 use function stream_socket_client;
 use function time;
-use function version_compare;
-
-use const PHP_VERSION;
 
 final class MemcachedTest extends TestCase
 {
@@ -241,29 +238,21 @@ final class MemcachedTest extends TestCase
 
     public function testDeleteMultipleReturnsFalse(): void
     {
-        if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
-            self::markTestSkipped('PHP version less than ' . PHP_VERSION);
-        }
-
         $cache = $this->createCacheInstance();
 
-        $memcachedStub = $this->createMock(\Memcached::class);
-        $memcachedStub->method('deleteMulti')->willReturn([false]);
+        $memcached = $this->createPartialMock(\Memcached::class, ['deleteMulti']);
+        $memcached->method('deleteMulti')->willReturn([false]);
 
-        $this->setInaccessibleProperty($cache, 'cache', $memcachedStub);
+        $this->setInaccessibleProperty($cache, 'cache', $memcached);
 
         $this->assertFalse($cache->deleteMultiple(['a', 'b']));
     }
 
     public function testExpire(): void
     {
-        if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
-            self::markTestSkipped('PHP version less than ' . PHP_VERSION);
-        }
-
         $ttl = 2;
         $cache = $this->createCacheInstance();
-        $memcached = $this->createMock(\Memcached::class);
+        $memcached = $this->createPartialMock(\Memcached::class, ['set']);
 
         $memcached->expects($this->once())
             ->method('set')
@@ -384,16 +373,12 @@ final class MemcachedTest extends TestCase
 
     public function testGetNewServers(): void
     {
-        if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
-            self::markTestSkipped('PHP version less than ' . PHP_VERSION);
-        }
-
         $cache = $this->createCacheInstance();
 
-        $memcachedStub = $this->createMock(\Memcached::class);
-        $memcachedStub->method('getServerList')->willReturn([['host' => '1.1.1.1', 'port' => 11211]]);
+        $memcached = $this->createPartialMock(\Memcached::class, ['getServerList']);
+        $memcached->method('getServerList')->willReturn([['host' => '1.1.1.1', 'port' => 11211]]);
 
-        $this->setInaccessibleProperty($cache, 'cache', $memcachedStub);
+        $this->setInaccessibleProperty($cache, 'cache', $memcached);
 
         $newServers = $this->invokeMethod($cache, 'getNewServers', [
             [
@@ -453,18 +438,14 @@ final class MemcachedTest extends TestCase
 
     public function testFailInitServers(): void
     {
-        if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
-            self::markTestSkipped('PHP version less than ' . PHP_VERSION);
-        }
-
         $this->expectException(CacheException::class);
 
         $cache = $this->createCacheInstance();
 
-        $memcachedStub = $this->createMock(\Memcached::class);
-        $memcachedStub->method('addServers')->willReturn(false);
+        $memcached = $this->createPartialMock(\Memcached::class, ['addServers']);
+        $memcached->method('addServers')->willReturn(false);
 
-        $this->setInaccessibleProperty($cache, 'cache', $memcachedStub);
+        $this->setInaccessibleProperty($cache, 'cache', $memcached);
         $this->invokeMethod($cache, 'initServers', [[], '']);
     }
 
