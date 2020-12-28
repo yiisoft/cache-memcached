@@ -241,7 +241,7 @@ final class MemcachedTest extends TestCase
 
     public function testDeleteMultipleReturnsFalse(): void
     {
-        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+        if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
             self::markTestSkipped('PHP version less than ' . PHP_VERSION);
         }
 
@@ -257,7 +257,7 @@ final class MemcachedTest extends TestCase
 
     public function testExpire(): void
     {
-        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+        if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
             self::markTestSkipped('PHP version less than ' . PHP_VERSION);
         }
 
@@ -384,7 +384,7 @@ final class MemcachedTest extends TestCase
 
     public function testGetNewServers(): void
     {
-        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+        if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
             self::markTestSkipped('PHP version less than ' . PHP_VERSION);
         }
 
@@ -453,7 +453,7 @@ final class MemcachedTest extends TestCase
 
     public function testFailInitServers(): void
     {
-        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+        if (version_compare(PHP_VERSION, '8.0.0', '>=')) {
             self::markTestSkipped('PHP version less than ' . PHP_VERSION);
         }
 
