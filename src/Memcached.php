@@ -124,12 +124,7 @@ final class Memcached implements CacheInterface
         $keys = $this->iterableToArray($keys);
         $this->validateKeys($keys);
         $this->cache->deleteMulti($keys);
-
-        if ($this->cache->getResultCode() === \Memcached::RES_NOTFOUND) {
-            return false;
-        }
-
-        return true;
+        return !($this->cache->getResultCode() === \Memcached::RES_NOTFOUND);
     }
 
     public function has($key): bool
