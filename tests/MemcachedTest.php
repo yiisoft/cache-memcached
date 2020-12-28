@@ -25,6 +25,9 @@ use function is_array;
 use function is_object;
 use function stream_socket_client;
 use function time;
+use function version_compare;
+
+use const PHP_VERSION;
 
 final class MemcachedTest extends TestCase
 {
@@ -238,6 +241,10 @@ final class MemcachedTest extends TestCase
 
     public function testDeleteMultipleReturnsFalse(): void
     {
+        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+            self::markTestSkipped('PHP version less than ' . PHP_VERSION);
+        }
+
         $cache = $this->createCacheInstance();
 
         $memcachedStub = $this->createMock(\Memcached::class);
@@ -250,6 +257,10 @@ final class MemcachedTest extends TestCase
 
     public function testExpire(): void
     {
+        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+            self::markTestSkipped('PHP version less than ' . PHP_VERSION);
+        }
+
         $ttl = 2;
         $cache = $this->createCacheInstance();
         $memcached = $this->createMock(\Memcached::class);
@@ -373,6 +384,10 @@ final class MemcachedTest extends TestCase
 
     public function testGetNewServers(): void
     {
+        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+            self::markTestSkipped('PHP version less than ' . PHP_VERSION);
+        }
+
         $cache = $this->createCacheInstance();
 
         $memcachedStub = $this->createMock(\Memcached::class);
@@ -438,6 +453,10 @@ final class MemcachedTest extends TestCase
 
     public function testFailInitServers(): void
     {
+        if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+            self::markTestSkipped('PHP version less than ' . PHP_VERSION);
+        }
+
         $this->expectException(CacheException::class);
 
         $cache = $this->createCacheInstance();
