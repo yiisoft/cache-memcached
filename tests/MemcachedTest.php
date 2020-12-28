@@ -393,8 +393,8 @@ final class MemcachedTest extends TestCase
     public function testThatServerWeightIsOptional(): void
     {
         $cache = $this->createCacheInstance(microtime() . __METHOD__, [
-            ['host' =>'1.1.1.1', 'port' => 11211, 'weight' => 1],
-            ['host' =>'2.2.2.2', 'port' => 11211, 'weight' => 1],
+            ['host' => '1.1.1.1', 'port' => 11211, 'weight' => 1],
+            ['host' => '2.2.2.2', 'port' => 11211, 'weight' => 1],
         ]);
 
         $memcached = $this->getInaccessibleProperty($cache, 'cache');
