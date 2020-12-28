@@ -240,6 +240,13 @@ final class MemcachedTest extends TestCase
     {
         $cache = $this->createCacheInstance();
 
+        $memcached = $this->getMockBuilder(\Memcached::class)
+            ->disallowMockingUnknownTypes()
+            ->getMock();
+
+        $memcached->method('deleteMulti')->willReturn([false]);
+        $this->setInaccessibleProperty($cache, 'cache', $memcached);
+
         $this->assertFalse($cache->deleteMultiple(['a', 'b']));
     }
 
