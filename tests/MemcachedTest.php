@@ -236,18 +236,6 @@ final class MemcachedTest extends TestCase
         $this->assertSameExceptObject($emptyData, $cache->getMultiple($keys));
     }
 
-    public function testDeleteMultipleReturnsFalse(): void
-    {
-        $cache = $this->createCacheInstance();
-
-        $memcached = $this->createPartialMock(\Memcached::class, ['deleteMulti']);
-        $memcached->method('deleteMulti')->willReturnCallback(fn () => [false]);
-
-        $this->setInaccessibleProperty($cache, 'cache', $memcached);
-
-        $this->assertFalse($cache->deleteMultiple(['a', 'b']));
-    }
-
     public function testExpire(): void
     {
         $ttl = 2;
