@@ -26,7 +26,7 @@ a distributed applications (e.g. with several servers, load balancers, etc.).
 The package could be installed with composer:
 
 ```
-composer install yiisoft/cache-memcached
+composer require yiisoft/cache-memcached
 ```
 
 ## Configuration
