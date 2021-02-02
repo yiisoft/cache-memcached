@@ -43,9 +43,6 @@
         "psr/simple-cache-implementation": "1.0.0"
     },
     "extra": {
-        "branch-alias": {
-            "dev-master": "3.0.x-dev"
-        },
         "config-plugin": {
             "common": "config/common.php",
             "params": "config/params.php"
@@ -54,8 +51,6 @@
     "config": {
         "sort-packages": true
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "scripts": {
         "test": "phpunit --testdox --no-interaction",
         "test-watch": "phpunit-watcher watch"

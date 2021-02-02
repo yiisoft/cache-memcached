@@ -34,7 +34,7 @@ final class MemcachedTest extends TestCase
             self::markTestSkipped('Required extension "memcached" is not loaded');
         }
 
-        // check whether memcached is running and skip tests if not.
+        // Check whether memcached is running and skip tests if not.
         if (!@stream_socket_client(MEMCACHED_HOST . ':' . MEMCACHED_PORT, $errorNumber, $errorDescription, 0.5)) {
             self::markTestSkipped('No memcached server running at ' . MEMCACHED_HOST . ':' . MEMCACHED_PORT . ' : ' . $errorNumber . ' - ' . $errorDescription);
         }
@@ -218,14 +218,14 @@ final class MemcachedTest extends TestCase
         $data = $this->getDataProviderData();
         $cache->setMultiple($data);
 
-        $this->assertSameExceptObject($data, $cache->getMultiple(array_map('strval', array_keys($data))));
+        $this->assertSameExceptObject($data, $cache->getMultiple(array_map('\strval', array_keys($data))));
     }
 
     public function testDeleteMultiple(): void
     {
         $cache = $this->createCacheInstance();
         $data = $this->getDataProviderData();
-        $keys = array_map('strval', array_keys($data));
+        $keys = array_map('\strval', array_keys($data));
         $cache->setMultiple($data);
 
         $this->assertSameExceptObject($data, $cache->getMultiple($keys));
@@ -319,7 +319,7 @@ final class MemcachedTest extends TestCase
             'IteratorAggregate' => [
                 ['a' => 1, 'b' => 2,],
                 new class() implements IteratorAggregate {
-                    public function getIterator()
+                    public function getIterator(): ArrayIterator
                     {
                         return new ArrayIterator(['a' => 1, 'b' => 2,]);
                     }
@@ -684,26 +684,26 @@ final class MemcachedTest extends TestCase
 
     private function assertSameExceptObject($expected, $actual): void
     {
-        // assert for all types
+        // Assert for all types.
         $this->assertEquals($expected, $actual);
 
-        // no more asserts for objects
+        // No more asserts for objects.
         if (is_object($expected)) {
             return;
         }
 
-        // asserts same for all types except objects and arrays that can contain objects
+        // Assert same for all types except objects and arrays that can contain objects.
         if (!is_array($expected)) {
             $this->assertSame($expected, $actual);
             return;
         }
 
-        // assert same for each element of the array except objects
+        // Assert same for each element of the array except objects.
         foreach ($expected as $key => $value) {
-            if (!is_object($value)) {
-                $this->assertSame($expected[$key], $actual[$key]);
-            } else {
+            if (is_object($value)) {
                 $this->assertEquals($expected[$key], $actual[$key]);
+            } else {
+                $this->assertSame($expected[$key], $actual[$key]);
             }
         }
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Yiisoft\Cache\Memcached\Memcached;
 
-/* @var $params array */
+/** @var array $params */
 
 return [
     Memcached::class => [
