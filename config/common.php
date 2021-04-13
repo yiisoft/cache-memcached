@@ -8,7 +8,7 @@ use Yiisoft\Cache\Memcached\Memcached;
 
 return [
     Memcached::class => [
-        '__class' => Memcached::class,
+        'class' => Memcached::class,
         '__construct()' => [
             $params['yiisoft/cache-memcached']['memcached']['persistentId'],
             $params['yiisoft/cache-memcached']['memcached']['servers'],
