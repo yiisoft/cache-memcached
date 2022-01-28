@@ -21,12 +21,17 @@ handler and implements [PSR-16](https://www.php-fig.org/psr/psr-16/) cache.
 This option can be considered as the fastest one when dealing with a cache in
 a distributed applications (e.g. with several servers, load balancers, etc.).
 
+## Requirements
+
+- PHP 7.4 or higher.
+- `Memcached` PHP extension.
+
 ## Installation
 
 The package could be installed with composer:
 
 ```
-composer require yiisoft/cache-memcached
+composer require yiisoft/cache-memcached --prefer-dist
 ```
 
 ## Configuration
@@ -118,6 +123,8 @@ To work with values in a more efficient manner, batch operations should be used:
 - `deleteMultiple()`
 
 This package can be used as a cache handler for the [Yii Caching Library](https://github.com/yiisoft/cache).
+
+## Testing
 
 ### Unit testing
 
