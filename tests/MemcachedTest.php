@@ -364,7 +364,9 @@ final class MemcachedTest extends TestCase
         $cache = $this->createCacheInstance();
 
         $memcached = $this->createPartialMock(\Memcached::class, ['getServerList']);
-        $memcached->method('getServerList')->willReturn([['host' => '1.1.1.1', 'port' => 11211]]);
+        $memcached
+            ->method('getServerList')
+            ->willReturn([['host' => '1.1.1.1', 'port' => 11211]]);
 
         $this->setInaccessibleProperty($cache, 'cache', $memcached);
 
@@ -431,7 +433,9 @@ final class MemcachedTest extends TestCase
         $cache = $this->createCacheInstance();
 
         $memcached = $this->createPartialMock(\Memcached::class, ['addServers']);
-        $memcached->method('addServers')->willReturn(false);
+        $memcached
+            ->method('addServers')
+            ->willReturn(false);
 
         $this->setInaccessibleProperty($cache, 'cache', $memcached);
         $this->invokeMethod($cache, 'initServers', [[], '']);
