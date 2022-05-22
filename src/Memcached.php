@@ -156,7 +156,9 @@ final class Memcached implements CacheInterface
         }
 
         if ($ttl instanceof DateInterval) {
-            $ttl = (new DateTime('@0'))->add($ttl)->getTimestamp();
+            $ttl = (new DateTime('@0'))
+                ->add($ttl)
+                ->getTimestamp();
         }
 
         $ttl = (int) $ttl;
