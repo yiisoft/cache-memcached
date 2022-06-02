@@ -242,7 +242,8 @@ final class MemcachedTest extends TestCase
         $cache = $this->createCacheInstance();
         $memcached = $this->createPartialMock(\Memcached::class, ['set']);
 
-        $memcached->expects($this->once())
+        $memcached
+            ->expects($this->once())
             ->method('set')
             ->with($this->equalTo('key'), $this->equalTo('value'), $this->equalTo($ttl))
             ->willReturn(true);
