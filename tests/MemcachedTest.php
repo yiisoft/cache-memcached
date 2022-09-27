@@ -189,7 +189,6 @@ final class MemcachedTest extends TestCase
     /**
      * @dataProvider dataProviderSetMultiple
      *
-     *
      * @throws InvalidArgumentException
      */
     public function testSetMultiple(?int $ttl): void
@@ -291,7 +290,6 @@ final class MemcachedTest extends TestCase
     /**
      * @dataProvider dataProviderNormalizeTtl
      *
-     *
      * @throws ReflectionException
      */
     public function testNormalizeTtl(mixed $ttl, mixed $expectedResult): void
@@ -335,7 +333,6 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider iterableProvider
-     *
      *
      * @throws InvalidArgumentException
      */
@@ -581,6 +578,7 @@ final class MemcachedTest extends TestCase
      * @param bool $revoke whether to make method inaccessible after execution
      *
      * @throws ReflectionException
+     *
      * @return mixed
      */
     private function invokeMethod($object, $method, array $args = [], bool $revoke = true)

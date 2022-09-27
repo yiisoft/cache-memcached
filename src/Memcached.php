@@ -172,8 +172,6 @@ final class Memcached implements CacheInterface
 
     /**
      * Converts iterable to array. If provided value is not iterable it throws an InvalidArgumentException.
-     *
-     *
      */
     private function iterableToArray(mixed $iterable): array
     {
@@ -204,8 +202,6 @@ final class Memcached implements CacheInterface
 
     /**
      * Returns the list of the servers that are not in the pool.
-     *
-     *
      */
     private function getNewServers(array $servers): array
     {
