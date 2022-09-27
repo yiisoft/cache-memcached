@@ -163,7 +163,7 @@ final class Memcached implements CacheInterface
 
         $ttl = (int) $ttl;
 
-        if ($ttl > 2592000) {
+        if ($ttl > 2_592_000) {
             return $ttl + time();
         }
 
@@ -173,11 +173,9 @@ final class Memcached implements CacheInterface
     /**
      * Converts iterable to array. If provided value is not iterable it throws an InvalidArgumentException.
      *
-     * @param mixed $iterable
      *
-     * @return array
      */
-    private function iterableToArray($iterable): array
+    private function iterableToArray(mixed $iterable): array
     {
         if (!is_iterable($iterable)) {
             throw new InvalidArgumentException('Iterable is expected, got ' . gettype($iterable));
@@ -188,9 +186,6 @@ final class Memcached implements CacheInterface
     }
 
     /**
-     * @param array $servers
-     * @param string $persistentId
-     *
      * @throws CacheException If an error occurred when adding servers to the server pool.
      * @throws InvalidArgumentException If the servers format is incorrect.
      */
@@ -210,9 +205,7 @@ final class Memcached implements CacheInterface
     /**
      * Returns the list of the servers that are not in the pool.
      *
-     * @param array $servers
      *
-     * @return array
      */
     private function getNewServers(array $servers): array
     {
@@ -259,19 +252,13 @@ final class Memcached implements CacheInterface
         return $normalized ?: [[self::DEFAULT_SERVER_HOST, self::DEFAULT_SERVER_PORT, self::DEFAULT_SERVER_WEIGHT]];
     }
 
-    /**
-     * @param mixed $key
-     */
-    private function validateKey($key): void
+    private function validateKey(mixed $key): void
     {
         if (!is_string($key) || $key === '' || strpbrk($key, '{}()/\@:')) {
             throw new InvalidArgumentException('Invalid key value.');
         }
     }
 
-    /**
-     * @param array $keys
-     */
     private function validateKeys(array $keys): void
     {
         foreach ($keys as $key) {
@@ -279,9 +266,6 @@ final class Memcached implements CacheInterface
         }
     }
 
-    /**
-     * @param array $values
-     */
     private function validateKeysOfValues(array $values): void
     {
         $keys = array_map('\strval', array_keys($values));
