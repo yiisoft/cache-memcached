@@ -189,8 +189,6 @@ final class MemcachedTest extends TestCase
     /**
      * @dataProvider dataProviderSetMultiple
      *
-     * @param int|null $ttl
-     *
      * @throws InvalidArgumentException
      */
     public function testSetMultiple(?int $ttl): void
@@ -292,16 +290,13 @@ final class MemcachedTest extends TestCase
     /**
      * @dataProvider dataProviderNormalizeTtl
      *
-     * @param mixed $ttl
-     * @param mixed $expectedResult
-     *
      * @throws ReflectionException
      */
-    public function testNormalizeTtl($ttl, $expectedResult): void
+    public function testNormalizeTtl(mixed $ttl, mixed $expectedResult): void
     {
         $cache = $this->createCacheInstance();
         $ttl = $this->invokeMethod($cache, 'normalizeTtl', [$ttl]);
-        $ttl = $ttl < 2592001 ? $ttl : $ttl - time();
+        $ttl = $ttl < 2_592_001 ? $ttl : $ttl - time();
 
         $this->assertSameExceptObject($expectedResult, $ttl);
     }
@@ -313,11 +308,11 @@ final class MemcachedTest extends TestCase
                 ['a' => 1, 'b' => 2,],
                 ['a' => 1, 'b' => 2,],
             ],
-            'ArrayIterator' => [
+            \ArrayIterator::class => [
                 ['a' => 1, 'b' => 2,],
                 new ArrayIterator(['a' => 1, 'b' => 2,]),
             ],
-            'IteratorAggregate' => [
+            \IteratorAggregate::class => [
                 ['a' => 1, 'b' => 2,],
                 new class () implements IteratorAggregate {
                     public function getIterator(): ArrayIterator
@@ -338,9 +333,6 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider iterableProvider
-     *
-     * @param array $array
-     * @param iterable $iterable
      *
      * @throws InvalidArgumentException
      */
@@ -481,10 +473,8 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider invalidKeyProvider
-     *
-     * @param mixed $key
      */
-    public function testGetThrowExceptionForInvalidKey($key): void
+    public function testGetThrowExceptionForInvalidKey(mixed $key): void
     {
         $cache = $this->createCacheInstance();
         $this->expectException(InvalidArgumentException::class);
@@ -493,10 +483,8 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider invalidKeyProvider
-     *
-     * @param mixed $key
      */
-    public function testSetThrowExceptionForInvalidKey($key): void
+    public function testSetThrowExceptionForInvalidKey(mixed $key): void
     {
         $cache = $this->createCacheInstance();
         $this->expectException(InvalidArgumentException::class);
@@ -505,10 +493,8 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider invalidKeyProvider
-     *
-     * @param mixed $key
      */
-    public function testDeleteThrowExceptionForInvalidKey($key): void
+    public function testDeleteThrowExceptionForInvalidKey(mixed $key): void
     {
         $cache = $this->createCacheInstance();
         $this->expectException(InvalidArgumentException::class);
@@ -517,10 +503,8 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider invalidKeyProvider
-     *
-     * @param mixed $key
      */
-    public function testGetMultipleThrowExceptionForInvalidKeys($key): void
+    public function testGetMultipleThrowExceptionForInvalidKeys(mixed $key): void
     {
         $cache = $this->createCacheInstance();
         $this->expectException(InvalidArgumentException::class);
@@ -529,10 +513,8 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider invalidKeyProvider
-     *
-     * @param mixed $key
      */
-    public function testGetMultipleThrowExceptionForInvalidKeysNotIterable($key): void
+    public function testGetMultipleThrowExceptionForInvalidKeysNotIterable(mixed $key): void
     {
         $cache = $this->createCacheInstance();
         $this->expectException(InvalidArgumentException::class);
@@ -541,10 +523,8 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider invalidKeyProvider
-     *
-     * @param mixed $key
      */
-    public function testSetMultipleThrowExceptionForInvalidKeysNotIterable($key): void
+    public function testSetMultipleThrowExceptionForInvalidKeysNotIterable(mixed $key): void
     {
         $cache = $this->createCacheInstance();
         $this->expectException(InvalidArgumentException::class);
@@ -553,10 +533,8 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider invalidKeyProvider
-     *
-     * @param mixed $key
      */
-    public function testDeleteMultipleThrowExceptionForInvalidKeys($key): void
+    public function testDeleteMultipleThrowExceptionForInvalidKeys(mixed $key): void
     {
         $cache = $this->createCacheInstance();
         $this->expectException(InvalidArgumentException::class);
@@ -565,10 +543,8 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider invalidKeyProvider
-     *
-     * @param mixed $key
      */
-    public function testDeleteMultipleThrowExceptionForInvalidKeysNotIterable($key): void
+    public function testDeleteMultipleThrowExceptionForInvalidKeysNotIterable(mixed $key): void
     {
         $cache = $this->createCacheInstance();
         $this->expectException(InvalidArgumentException::class);
@@ -577,10 +553,8 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider invalidKeyProvider
-     *
-     * @param mixed $key
      */
-    public function testHasInvalidKey($key): void
+    public function testHasInvalidKey(mixed $key): void
     {
         $cache = $this->createCacheInstance();
         $this->expectException(InvalidArgumentException::class);
@@ -601,7 +575,6 @@ final class MemcachedTest extends TestCase
      *
      * @param $object
      * @param $method
-     * @param array $args
      * @param bool $revoke whether to make method inaccessible after execution
      *
      * @throws ReflectionException
@@ -625,12 +598,9 @@ final class MemcachedTest extends TestCase
     /**
      * Sets an inaccessible object property to a designated value.
      *
-     * @param object $object
-     * @param string $propertyName
-     * @param mixed $value
      * @param bool $revoke whether to make property inaccessible after setting
      */
-    private function setInaccessibleProperty(object $object, string $propertyName, $value, bool $revoke = true): void
+    private function setInaccessibleProperty(object $object, string $propertyName, mixed $value, bool $revoke = true): void
     {
         $class = new ReflectionClass($object);
 
@@ -650,8 +620,6 @@ final class MemcachedTest extends TestCase
     /**
      * Gets an inaccessible object property.
      *
-     * @param object $object
-     * @param string $propertyName
      * @param bool $revoke whether to make property inaccessible after getting
      *
      * @return mixed
