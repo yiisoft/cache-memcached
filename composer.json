@@ -20,9 +20,9 @@
         "source": "https://github.com/yiisoft/cache-memcached"
     },
     "require": {
-        "php": "^7.4|^8.0",
+        "php": "^8.0",
         "ext-memcached": "*",
-        "psr/simple-cache": "^1.0.1"
+        "psr/simple-cache": "^2.0|^3.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5",

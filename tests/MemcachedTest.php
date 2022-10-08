@@ -468,12 +468,6 @@ final class MemcachedTest extends TestCase
     public function invalidKeyProvider(): array
     {
         return [
-            'int' => [1],
-            'float' => [1.1],
-            'null' => [null],
-            'bool' => [true],
-            'object' => [new stdClass()],
-            'callable' => [fn () => 'key'],
             'psr-reserved' => ['{}()/\@:'],
             'empty-string' => [''],
         ];
@@ -532,30 +526,6 @@ final class MemcachedTest extends TestCase
      *
      * @param mixed $key
      */
-    public function testGetMultipleThrowExceptionForInvalidKeysNotIterable($key): void
-    {
-        $cache = $this->createCacheInstance();
-        $this->expectException(InvalidArgumentException::class);
-        $cache->getMultiple($key);
-    }
-
-    /**
-     * @dataProvider invalidKeyProvider
-     *
-     * @param mixed $key
-     */
-    public function testSetMultipleThrowExceptionForInvalidKeysNotIterable($key): void
-    {
-        $cache = $this->createCacheInstance();
-        $this->expectException(InvalidArgumentException::class);
-        $cache->setMultiple($key);
-    }
-
-    /**
-     * @dataProvider invalidKeyProvider
-     *
-     * @param mixed $key
-     */
     public function testDeleteMultipleThrowExceptionForInvalidKeys($key): void
     {
         $cache = $this->createCacheInstance();
@@ -565,22 +535,8 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider invalidKeyProvider
-     *
-     * @param mixed $key
      */
-    public function testDeleteMultipleThrowExceptionForInvalidKeysNotIterable($key): void
-    {
-        $cache = $this->createCacheInstance();
-        $this->expectException(InvalidArgumentException::class);
-        $cache->deleteMultiple($key);
-    }
-
-    /**
-     * @dataProvider invalidKeyProvider
-     *
-     * @param mixed $key
-     */
-    public function testHasInvalidKey($key): void
+    public function testHasInvalidKey(string $key): void
     {
         $cache = $this->createCacheInstance();
         $this->expectException(InvalidArgumentException::class);
