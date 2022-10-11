@@ -23,7 +23,7 @@ a distributed applications (e.g. with several servers, load balancers, etc.).
 
 ## Requirements
 
-- PHP 7.4 or higher.
+- PHP 8.0 or higher.
 - `Memcached` PHP extension.
 
 ## Installation
