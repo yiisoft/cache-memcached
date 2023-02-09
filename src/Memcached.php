@@ -170,8 +170,6 @@ final class Memcached implements CacheInterface
 
     /**
      * Converts iterable to array.
-     *
-     *
      */
     private function iterableToArray(iterable $iterable): array
     {
