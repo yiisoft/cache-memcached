@@ -161,7 +161,7 @@ final class Memcached implements CacheInterface
 
         $ttl = (int) $ttl;
 
-        if ($ttl > 2592000) {
+        if ($ttl > 2_592_000) {
             return $ttl + time();
         }
 
@@ -170,10 +170,6 @@ final class Memcached implements CacheInterface
 
     /**
      * Converts iterable to array.
-     *
-     * @param iterable $iterable
-     *
-     * @return array
      */
     private function iterableToArray(iterable $iterable): array
     {
@@ -182,9 +178,6 @@ final class Memcached implements CacheInterface
     }
 
     /**
-     * @param array $servers
-     * @param string $persistentId
-     *
      * @throws CacheException If an error occurred when adding servers to the server pool.
      * @throws InvalidArgumentException If the servers format is incorrect.
      */
@@ -203,10 +196,6 @@ final class Memcached implements CacheInterface
 
     /**
      * Returns the list of the servers that are not in the pool.
-     *
-     * @param array $servers
-     *
-     * @return array
      */
     private function getNewServers(array $servers): array
     {
