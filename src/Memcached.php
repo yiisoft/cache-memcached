@@ -42,7 +42,7 @@ final class Memcached implements CacheInterface
     /**
      * @var \Memcached The Memcached instance.
      */
-    private readonly \Memcached $cache;
+    private \Memcached $cache;
 
     /**
      * @param string $persistentId The ID that identifies the Memcached instance.
