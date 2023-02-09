@@ -13,10 +13,7 @@ use function array_fill_keys;
 use function array_key_exists;
 use function array_keys;
 use function array_map;
-use function gettype;
 use function is_array;
-use function is_iterable;
-use function is_string;
 use function iterator_to_array;
 use function strpbrk;
 use function time;
@@ -63,7 +60,7 @@ final class Memcached implements CacheInterface
         $this->initServers($servers, $persistentId);
     }
 
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         $this->validateKey($key);
         $value = $this->cache->get($key);
@@ -75,7 +72,7 @@ final class Memcached implements CacheInterface
         return $default;
     }
 
-    public function set($key, $value, $ttl = null): bool
+    public function set(string $key, mixed $value, null|int|DateInterval $ttl = null): bool
     {
         $this->validateKey($key);
         $ttl = $this->normalizeTtl($ttl);
@@ -87,7 +84,7 @@ final class Memcached implements CacheInterface
         return $this->cache->set($key, $value, $ttl);
     }
 
-    public function delete($key): bool
+    public function delete(string $key): bool
     {
         $this->validateKey($key);
         return $this->cache->delete($key);
@@ -98,10 +95,11 @@ final class Memcached implements CacheInterface
         return $this->cache->flush();
     }
 
-    public function getMultiple($keys, $default = null): iterable
+    public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
         $keys = $this->iterableToArray($keys);
         $this->validateKeys($keys);
+        /** @var array<string, mixed> $values */
         $values = array_fill_keys($keys, $default);
         $valuesFromCache = $this->cache->getMulti($keys);
 
@@ -112,14 +110,14 @@ final class Memcached implements CacheInterface
         return $values;
     }
 
-    public function setMultiple($values, $ttl = null): bool
+    public function setMultiple(iterable $values, null|int|DateInterval $ttl = null): bool
     {
         $values = $this->iterableToArray($values);
         $this->validateKeysOfValues($values);
         return $this->cache->setMulti($values, $this->normalizeTtl($ttl));
     }
 
-    public function deleteMultiple($keys): bool
+    public function deleteMultiple(iterable $keys): bool
     {
         $keys = $this->iterableToArray($keys);
         $this->validateKeys($keys);
@@ -133,7 +131,7 @@ final class Memcached implements CacheInterface
         return true;
     }
 
-    public function has($key): bool
+    public function has(string $key): bool
     {
         $this->validateKey($key);
         $this->cache->get($key);
@@ -149,7 +147,7 @@ final class Memcached implements CacheInterface
      *
      * @see https://secure.php.net/manual/en/memcached.expiration.php
      */
-    private function normalizeTtl($ttl): int
+    private function normalizeTtl(DateInterval|int|string|null $ttl): int
     {
         if ($ttl === null) {
             return self::TTL_INFINITY;
@@ -171,14 +169,14 @@ final class Memcached implements CacheInterface
     }
 
     /**
-     * Converts iterable to array. If provided value is not iterable it throws an InvalidArgumentException.
+     * Converts iterable to array.
+     *
+     * @param iterable $iterable
+     *
+     * @return array
      */
-    private function iterableToArray(mixed $iterable): array
+    private function iterableToArray(iterable $iterable): array
     {
-        if (!is_iterable($iterable)) {
-            throw new InvalidArgumentException('Iterable is expected, got ' . gettype($iterable));
-        }
-
         /** @psalm-suppress RedundantCast */
         return $iterable instanceof Traversable ? iterator_to_array($iterable) : (array) $iterable;
     }
@@ -248,9 +246,9 @@ final class Memcached implements CacheInterface
         return $normalized ?: [[self::DEFAULT_SERVER_HOST, self::DEFAULT_SERVER_PORT, self::DEFAULT_SERVER_WEIGHT]];
     }
 
-    private function validateKey(mixed $key): void
+    private function validateKey(string $key): void
     {
-        if (!is_string($key) || $key === '' || strpbrk($key, '{}()/\@:')) {
+        if ($key === '' || strpbrk($key, '{}()/\@:')) {
             throw new InvalidArgumentException('Invalid key value.');
         }
     }

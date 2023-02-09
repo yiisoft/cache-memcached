@@ -308,11 +308,11 @@ final class MemcachedTest extends TestCase
                 ['a' => 1, 'b' => 2,],
                 ['a' => 1, 'b' => 2,],
             ],
-            \ArrayIterator::class => [
+            'ArrayIterator' => [
                 ['a' => 1, 'b' => 2,],
                 new ArrayIterator(['a' => 1, 'b' => 2,]),
             ],
-            \IteratorAggregate::class => [
+            'IteratorAggregate' => [
                 ['a' => 1, 'b' => 2,],
                 new class () implements IteratorAggregate {
                     public function getIterator(): ArrayIterator
@@ -460,12 +460,6 @@ final class MemcachedTest extends TestCase
     public function invalidKeyProvider(): array
     {
         return [
-            'int' => [1],
-            'float' => [1.1],
-            'null' => [null],
-            'bool' => [true],
-            'object' => [new stdClass()],
-            'callable' => [fn () => 'key'],
             'psr-reserved' => ['{}()/\@:'],
             'empty-string' => [''],
         ];
@@ -514,26 +508,6 @@ final class MemcachedTest extends TestCase
     /**
      * @dataProvider invalidKeyProvider
      */
-    public function testGetMultipleThrowExceptionForInvalidKeysNotIterable(mixed $key): void
-    {
-        $cache = $this->createCacheInstance();
-        $this->expectException(InvalidArgumentException::class);
-        $cache->getMultiple($key);
-    }
-
-    /**
-     * @dataProvider invalidKeyProvider
-     */
-    public function testSetMultipleThrowExceptionForInvalidKeysNotIterable(mixed $key): void
-    {
-        $cache = $this->createCacheInstance();
-        $this->expectException(InvalidArgumentException::class);
-        $cache->setMultiple($key);
-    }
-
-    /**
-     * @dataProvider invalidKeyProvider
-     */
     public function testDeleteMultipleThrowExceptionForInvalidKeys(mixed $key): void
     {
         $cache = $this->createCacheInstance();
@@ -544,17 +518,7 @@ final class MemcachedTest extends TestCase
     /**
      * @dataProvider invalidKeyProvider
      */
-    public function testDeleteMultipleThrowExceptionForInvalidKeysNotIterable(mixed $key): void
-    {
-        $cache = $this->createCacheInstance();
-        $this->expectException(InvalidArgumentException::class);
-        $cache->deleteMultiple($key);
-    }
-
-    /**
-     * @dataProvider invalidKeyProvider
-     */
-    public function testHasInvalidKey(mixed $key): void
+    public function testHasInvalidKey(string $key): void
     {
         $cache = $this->createCacheInstance();
         $this->expectException(InvalidArgumentException::class);
