@@ -42,7 +42,7 @@ final class Memcached implements CacheInterface
     /**
      * @var \Memcached The Memcached instance.
      */
-    private \Memcached $cache;
+    private readonly \Memcached $cache;
 
     /**
      * @param string $persistentId The ID that identifies the Memcached instance.
@@ -171,9 +171,7 @@ final class Memcached implements CacheInterface
     /**
      * Converts iterable to array.
      *
-     * @param iterable $iterable
      *
-     * @return array
      */
     private function iterableToArray(iterable $iterable): array
     {
