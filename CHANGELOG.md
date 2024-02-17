@@ -2,7 +2,8 @@
 
 ## 2.0.1 under development
 
-- no changes in this release.
+- Enh #62: Remove unneeded casting to array in private method `Memcached::iterableToArray()` (@vjik)
+- Enh #62: Improve list of memcached server validation (@vjik) 
 
 ## 2.0.0 February 15, 2023
 
