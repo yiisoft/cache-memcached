@@ -219,15 +219,6 @@ final class MemcachedTest extends TestCase
         $this->assertSameExceptObject($data, $cache->getMultiple(array_map('\strval', array_keys($data))));
     }
 
-    public function testGetMultipleWithNotStringKey()
-    {
-        $cache = $this->createCacheInstance();
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid key type. Expected string, got int.');
-        $cache->getMultiple(['test', 1]);
-    }
-
     public function testDeleteMultiple(): void
     {
         $cache = $this->createCacheInstance();

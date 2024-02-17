@@ -4,7 +4,6 @@
 
 - Enh #62: Remove not need casting to array in private method `Memcached::iterableToArray()` (@vjik)
 - Enh #62: Improve list of memcached server validation (@vjik) 
-- Enh #62: Check key type when multiple keys passed (@vjik) 
 
 ## 2.0.0 February 15, 2023
 
