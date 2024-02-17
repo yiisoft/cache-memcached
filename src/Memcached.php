@@ -254,7 +254,9 @@ final class Memcached implements CacheInterface
                     . ' containing hostname (string), port (int), and, optionally, weight (int) of the server.',
                 );
             }
-
+            /**
+             * @psalm-var array{host:string,port:int,weight?:int} $server Need for PHP 8.0
+             */
 
             $normalized[] = [$server['host'], $server['port'], $server['weight'] ?? self::DEFAULT_SERVER_WEIGHT];
         }
