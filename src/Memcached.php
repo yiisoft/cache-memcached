@@ -173,8 +173,7 @@ final class Memcached implements CacheInterface
      */
     private function iterableToArray(iterable $iterable): array
     {
-        /** @psalm-suppress RedundantCast */
-        return $iterable instanceof Traversable ? iterator_to_array($iterable) : (array) $iterable;
+        return $iterable instanceof Traversable ? iterator_to_array($iterable) : $iterable;
     }
 
     /**

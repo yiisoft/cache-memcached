@@ -2,7 +2,7 @@
 
 ## 2.0.1 under development
 
-- no changes in this release.
+- Enh #62: Remove not need casting to array in private method `Memcached::iterableToArray()` (@vjik)
 
 ## 2.0.0 February 15, 2023
 
