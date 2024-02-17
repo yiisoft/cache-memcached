@@ -24,20 +24,15 @@ on:
 name: static analysis
 
 jobs:
-  mutation:
+  psalm:
     name: PHP ${{ matrix.php }}-${{ matrix.os }}
 
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        os:
-          - ubuntu-latest
-
-        php:
-          - 8.1
-          - 8.2
-          - 8.3
+        os: ['ubuntu-latest']
+        php: ['8.0', '8.1', '8.2', '8.3']
 
     steps:
       - name: Checkout
@@ -67,5 +62,10 @@ jobs:
       - name: Install dependencies with composer
         run: composer update --prefer-dist --no-interaction --no-progress --optimize-autoloader --ansi
 
-      - name: Static analysis
-        run: vendor/bin/psalm --shepherd --stats --output-format=checkstyle | cs2pr --graceful-warnings --colorize
+      - name: Static analysis PHP 8.0
+        if: matrix.php == '8.0'
+        run: vendor/bin/psalm --config=psalm80.xml --shepherd --stats --output-format=github --php-version=${{ matrix.php }}
+
+      - name: Static analysis PHP 8.1+
+        if: matrix.php != '8.0'
+        run: vendor/bin/psalm --shepherd --stats --output-format=github --php-version=${{ matrix.php }}
