@@ -269,9 +269,20 @@ final class Memcached implements CacheInterface
         }
     }
 
+    /**
+     * @psalm-assert string[] $keys
+     */
     private function validateKeys(array $keys): void
     {
         foreach ($keys as $key) {
+            if (!is_string($key)) {
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Invalid key type. Expected string, got %s.',
+                        get_debug_type($key)
+                    )
+                );
+            }
             $this->validateKey($key);
         }
     }
