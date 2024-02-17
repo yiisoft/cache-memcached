@@ -31,7 +31,7 @@ a distributed applications (e.g. with several servers, load balancers, etc.).
 The package could be installed with composer:
 
 ```
-composer require yiisoft/cache-memcached --prefer-dist
+composer require yiisoft/cache-memcached
 ```
 
 ## Configuration
@@ -124,31 +124,9 @@ To work with values in a more efficient manner, batch operations should be used:
 
 This package can be used as a cache handler for the [Yii Caching Library](https://github.com/yiisoft/cache).
 
-## Testing
+## Documentation
 
-### Unit testing
-
-The package is tested with [PHPUnit](https://phpunit.de/). To run tests:
-
-```shell
-./vendor/bin/phpunit
-```
-
-### Mutation testing
-
-The package tests are checked with [Infection](https://infection.github.io/) mutation framework. To run it:
-
-```shell
-./vendor/bin/infection
-```
-
-### Static analysis
-
-The code is statically analyzed with [Psalm](https://psalm.dev/). To run static analysis:
-
-```shell
-./vendor/bin/psalm
-```
+- [Internals](docs/internals.md)
 
 ### Support the project
 
