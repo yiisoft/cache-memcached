@@ -29,6 +29,8 @@ use function time;
  *
  * Note, there is no security measure to protected data in memcached.
  * All data in memcached can be accessed by any process running in the system.
+ *
+ * @psalm-type NewServerType=array{0:string,1:int,2?:int}
  */
 final class Memcached implements CacheInterface
 {
@@ -199,12 +201,18 @@ final class Memcached implements CacheInterface
 
     /**
      * Returns the list of the servers that are not in the pool.
+     *
+     * @psalm-param list<NewServerType> $servers
      */
     private function getNewServers(array $servers): array
     {
         $existingServers = [];
         $newServers = [];
 
+        /**
+         * @psalm-var array{host:string,port:int} $existingServer
+         * @see https://www.php.net/manual/en/memcached.getserverlist.php
+         */
         foreach ($this->cache->getServerList() as $existingServer) {
             $existingServers["{$existingServer['host']}:{$existingServer['port']}"] = true;
         }
@@ -226,18 +234,27 @@ final class Memcached implements CacheInterface
      * @throws InvalidArgumentException If the servers format is incorrect.
      *
      * @return array The normalized servers.
+     *
+     * @psalm-return list<NewServerType> $servers
      */
     private function normalizeServers(array $servers): array
     {
         $normalized = [];
 
         foreach ($servers as $server) {
-            if (!is_array($server) || !isset($server['host'], $server['port'])) {
+            if (
+                !is_array($server)
+                || !isset($server['host'], $server['port'])
+                || !is_string($server['host'])
+                || !is_int($server['port'])
+                || (isset($server['weight']) && !is_int($server['weight']))
+            ) {
                 throw new InvalidArgumentException(
                     'Each entry in servers parameter is supposed to be an array'
-                    . ' containing hostname, port, and, optionally, weight of the server.',
+                    . ' containing hostname (string), port (int), and, optionally, weight (int) of the server.',
                 );
             }
+
 
             $normalized[] = [$server['host'], $server['port'], $server['weight'] ?? self::DEFAULT_SERVER_WEIGHT];
         }
