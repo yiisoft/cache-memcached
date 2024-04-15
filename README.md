@@ -30,7 +30,7 @@ a distributed applications (e.g. with several servers, load balancers, etc.).
 
 The package could be installed with composer:
 
-```
+```shell
 composer require yiisoft/cache-memcached
 ```
 

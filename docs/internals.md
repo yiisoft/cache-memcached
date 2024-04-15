@@ -13,7 +13,7 @@ docker run --rm --name yiisoft-cache-memcached-cache --detach --publish 11211:11
 Memcached must be accessible by address `127.0.0.1`. If you use PHP via docker container, run PHP container in network
 of memcached container. Use `docker run` command argument for it:
 
-```
+```dockerfile
 --network container:yiisoft-cache-memcached-cache
 ```
 
