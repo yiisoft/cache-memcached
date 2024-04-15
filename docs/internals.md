@@ -6,7 +6,7 @@ For greater ease it is recommended to use docker containers.
 
 Run container with memcached directly via command:
 
-```shell
+```dockerfile
 docker run --rm --name yiisoft-cache-memcached-cache --detach --publish 11211:11211 memcached:1.6.23
 ```
 
