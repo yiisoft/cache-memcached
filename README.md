@@ -126,7 +126,7 @@ This package can be used as a cache handler for the [Yii Caching Library](https:
 
 ## Documentation
 
-- [Internals](docs/internals.md)
+More information can be found in the [Internals](docs/internals.md).
 
 ## License
 
