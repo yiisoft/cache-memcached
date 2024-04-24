@@ -20,7 +20,7 @@ use function time;
 
 /**
  * Memcached implements a cache application component based on
- * [memcached](http://pecl.php.net/package/memcached) PECL extension.
+ * [memcached](https://pecl.php.net/package/memcached) PECL extension.
  *
  * Memcached can be configured with a list of memcached servers passed to the constructor.
  * By default, Memcached assumes there is a memcached server running on localhost at port 11211.
@@ -251,7 +251,7 @@ final class Memcached implements CacheInterface
             ) {
                 throw new InvalidArgumentException(
                     'Each entry in servers parameter is supposed to be an array'
-                    . ' containing hostname (string), port (int), and, optionally, weight (int) of the server.',
+                        . ' containing hostname (string), port (int), and, optionally, weight (int) of the server.',
                 );
             }
             /**
