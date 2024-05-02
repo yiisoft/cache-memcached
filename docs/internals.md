@@ -1,5 +1,22 @@
 # Internals
 
+## Development environment
+
+For greater ease it is recommended to use docker containers.
+
+Run container with memcached directly via command:
+
+```shell
+docker run --rm --name yiisoft-cache-memcached-cache --detach --publish 11211:11211 memcached:1.6.23
+```
+
+Memcached must be accessible by address `127.0.0.1`. If you use PHP via docker container, run PHP container in network
+of memcached container. Use `docker run` command argument for it:
+
+```shell
+--network container:yiisoft-cache-memcached-cache
+```
+
 ## Unit testing
 
 The package is tested with [PHPUnit](https://phpunit.de/). To run tests:
@@ -25,7 +42,7 @@ The code is statically analyzed with [Psalm](https://psalm.dev/). To run static 
 ./vendor/bin/psalm
 ```
 
-## Rector
+## Code style
 
 Use [Rector](https://github.com/rectorphp/rector) to make codebase follow some specific rules or
 use either newest or any specific version of PHP:
@@ -34,11 +51,10 @@ use either newest or any specific version of PHP:
 ./vendor/bin/rector
 ```
 
-## Composer require checker
+## Dependencies
 
-This package uses [composer-require-checker](https://github.com/maglnet/ComposerRequireChecker) to check if all dependencies are correctly defined in `composer.json`.
-
-To run the checker, execute the following command:
+This package uses [composer-require-checker](https://github.com/maglnet/ComposerRequireChecker) to check if all
+dependencies are correctly defined in `composer.json`. To run the checker, execute the following command:
 
 ```shell
 ./vendor/bin/composer-require-checker

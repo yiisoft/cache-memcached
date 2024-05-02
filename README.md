@@ -34,23 +34,6 @@ The package could be installed with composer:
 composer require yiisoft/cache-memcached
 ```
 
-## Development environment
-
-For greater ease it is recommended to use docker containers.
-
-Run container with memcached directly via command:
-
-```dockerfile
-docker run --rm --name yiisoft-cache-memcached-cache --detach --publish 11211:11211 memcached:1.6.23
-```
-
-Memcached must be accessible by address `127.0.0.1`. If you use PHP via docker container, run PHP container in network
-of memcached container. Use `docker run` command argument for it:
-
-```shell
---network container:yiisoft-cache-memcached-cache
-```
-
 ## Configuration
 
 Creating an instance:
@@ -145,10 +128,15 @@ This package can be used as a cache handler for the [Yii Caching Library](https:
 
 - [Internals](docs/internals.md)
 
-## Support
+If you need help or have a question, the [Yii Forum](https://forum.yiiframework.com/c/yii-3-0/63) is a good place for
+that. You may also check out other [Yii Community Resources](https://www.yiiframework.com/community).
 
-If you need help or have a question, the [Yii Forum](https://forum.yiiframework.com/c/yii-3-0/63) is a good place for that.
-You may also check out other [Yii Community Resources](https://www.yiiframework.com/community).
+## License
+
+The Yii Cache Library - Memcached Handler is free software. It is released under the terms of the BSD License.
+Please see [`LICENSE`](./LICENSE.md) for more information.
+
+Maintained by [Yii Software](https://www.yiiframework.com/).
 
 ## Support the project
 
@@ -161,10 +149,3 @@ You may also check out other [Yii Community Resources](https://www.yiiframework.
 [![Telegram](https://img.shields.io/badge/telegram-join-1DA1F2?style=flat&logo=telegram)](https://t.me/yii3en)
 [![Facebook](https://img.shields.io/badge/facebook-join-1DA1F2?style=flat&logo=facebook&logoColor=ffffff)](https://www.facebook.com/groups/yiitalk)
 [![Slack](https://img.shields.io/badge/slack-join-1DA1F2?style=flat&logo=slack)](https://yiiframework.com/go/slack)
-
-## License
-
-The Yii Cache Library - Memcached Handler is free software. It is released under the terms of the BSD License.
-Please see [`LICENSE`](./LICENSE.md) for more information.
-
-Maintained by [Yii Software](https://www.yiiframework.com/).

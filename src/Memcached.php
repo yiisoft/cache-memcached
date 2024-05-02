@@ -250,8 +250,7 @@ final class Memcached implements CacheInterface
                 || (isset($server['weight']) && !is_int($server['weight']))
             ) {
                 throw new InvalidArgumentException(
-                    'Each entry in servers parameter is supposed to be an array'
-                        . ' containing hostname (string), port (int), and, optionally, weight (int) of the server.',
+                    'Each entry in servers parameter is supposed to be an array containing hostname (string), port (int), and, optionally, weight (int) of the server.',
                 );
             }
             /**
