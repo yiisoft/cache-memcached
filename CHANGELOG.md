@@ -1,4 +1,4 @@
-# Yii Memcached Change Log
+# Yii Cache Library - Memcached Handler Change Log
 
 ## 2.0.1 under development
 
