@@ -229,7 +229,7 @@ final class MemcachedTest extends TestCase
         $this->assertSameExceptObject($data, $cache->getMultiple($keys));
 
         $cache->deleteMultiple($keys);
-        $emptyData = array_map(static fn () => null, $data);
+        $emptyData = array_map(static fn() => null, $data);
 
         $this->assertSameExceptObject($emptyData, $cache->getMultiple($keys));
     }
@@ -314,7 +314,7 @@ final class MemcachedTest extends TestCase
             ],
             'IteratorAggregate' => [
                 ['a' => 1, 'b' => 2,],
-                new class () implements IteratorAggregate {
+                new class implements IteratorAggregate {
                     public function getIterator(): ArrayIterator
                     {
                         return new ArrayIterator(['a' => 1, 'b' => 2,]);

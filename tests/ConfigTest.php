@@ -9,6 +9,8 @@ use Yiisoft\Cache\Memcached\Memcached;
 use Yiisoft\Di\Container;
 use Yiisoft\Di\ContainerConfig;
 
+use function dirname;
+
 final class ConfigTest extends TestCase
 {
     public function testBase(): void
@@ -24,8 +26,8 @@ final class ConfigTest extends TestCase
     {
         return new Container(
             ContainerConfig::create()->withDefinitions(
-                $this->getDiConfig()
-            )
+                $this->getDiConfig(),
+            ),
         );
     }
 

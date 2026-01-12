@@ -17,6 +17,8 @@ use function is_array;
 use function iterator_to_array;
 use function strpbrk;
 use function time;
+use function is_int;
+use function is_string;
 
 /**
  * Memcached implements a cache application component based on
@@ -25,7 +27,7 @@ use function time;
  * Memcached can be configured with a list of memcached servers passed to the constructor.
  * By default, Memcached assumes there is a memcached server running on localhost at port 11211.
  *
- * See {@see \Psr\SimpleCache\CacheInterface} for common cache operations that MemCached supports.
+ * See {@see CacheInterface} for common cache operations that MemCached supports.
  *
  * Note, there is no security measure to protected data in memcached.
  * All data in memcached can be accessed by any process running in the system.
@@ -74,7 +76,7 @@ final class Memcached implements CacheInterface
         return $default;
     }
 
-    public function set(string $key, mixed $value, null|int|DateInterval $ttl = null): bool
+    public function set(string $key, mixed $value, int|DateInterval|null $ttl = null): bool
     {
         $this->validateKey($key);
         $ttl = $this->normalizeTtl($ttl);
@@ -112,7 +114,7 @@ final class Memcached implements CacheInterface
         return $values;
     }
 
-    public function setMultiple(iterable $values, null|int|DateInterval $ttl = null): bool
+    public function setMultiple(iterable $values, int|DateInterval|null $ttl = null): bool
     {
         $values = $this->iterableToArray($values);
         $this->validateKeysOfValues($values);
