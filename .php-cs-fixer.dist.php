@@ -10,8 +10,6 @@ $finder = (new Finder())->in([
     __DIR__ . '/config',
     __DIR__ . '/src',
     __DIR__ . '/tests',
-])->notPath([
-    'MockHelper.php'
 ]);
 
 // TODO: Update the configuration after raising the minimum PHP version
