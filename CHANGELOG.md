@@ -5,6 +5,7 @@
 - Enh #62: Remove unneeded casting to array in private method `Memcached::iterableToArray()` (@vjik)
 - Enh #62: Improve list of memcached server validation (@vjik)
 - Enh #73: Explicitly import classes and functions in "use" section (@mspirkov)
+- Enh #76: Remove unnecessary files from Composer package (@mspirkov)
 
 ## 2.0.0 February 15, 2023
 
