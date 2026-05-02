@@ -41,7 +41,7 @@
         "rector/rector": "^2.0.3",
         "roave/infection-static-analysis-plugin": "^1.16",
         "spatie/phpunit-watcher": "^1.23",
-        "vimeo/psalm": "^4.30|^5.22",
+        "vimeo/psalm": "^4.30 || ^5.26.1 || ^6.16.1",
         "yiisoft/di": "^1.2"
     },
     "autoload": {
@@ -75,6 +75,7 @@
     },
     "scripts": {
         "test": "phpunit --testdox --no-interaction",
-        "test-watch": "phpunit-watcher watch"
+        "test-watch": "phpunit-watcher watch",
+        "psalm": "psalm"
     }
 }
