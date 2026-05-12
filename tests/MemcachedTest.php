@@ -525,13 +525,50 @@ final class MemcachedTest extends TestCase
         $cache->has($key);
     }
 
-    private function createCacheInstance($persistentId = '', array $servers = []): CacheInterface
+    public function testInvalidOptions(): void
+    {
+        $this->expectException(\Yiisoft\Cache\Memcached\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid $options');
+        $this->createCacheInstance(options: ['foo' => 'bar']);
+    }
+
+    static public function optionsProvider(): array
+    {
+        return [
+            [
+                \Memcached::OPT_DISTRIBUTION => \Memcached::DISTRIBUTION_CONSISTENT,
+            ],
+            [
+                \Memcached::OPT_LIBKETAMA_COMPATIBLE => true,
+                \Memcached::OPT_REMOVE_FAILED_SERVERS => true,
+                \Memcached::OPT_RETRY_TIMEOUT => 3,
+                \Memcached::OPT_SEND_TIMEOUT => 3,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider optionsProvider
+     */
+    public function testOptions(array $options): void
+    {
+        $cache = $this->createCacheInstance(options: $options);
+        /** @var \Memcached $memcached */
+        $memcached = $this->getInaccessibleProperty($cache, 'cache');
+
+        foreach ($options as $key => $expected) {
+            $actual = $memcached->getOption($key);
+            $this->assertEquals($expected, $actual);
+        }
+    }
+
+    private function createCacheInstance($persistentId = '', array $servers = [], array $options = []): CacheInterface
     {
         if ($servers === []) {
             $servers[] = ['host' => MEMCACHED_HOST, 'port' => MEMCACHED_PORT];
         }
 
-        return new Memcached($persistentId, $servers);
+        return new Memcached($persistentId, $servers, $options);
     }
 
     /**

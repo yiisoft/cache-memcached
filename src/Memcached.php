@@ -58,9 +58,14 @@ final class Memcached implements CacheInterface
      * @see https://www.php.net/manual/en/memcached.construct.php
      * @see https://www.php.net/manual/en/memcached.addservers.php
      */
-    public function __construct(string $persistentId = '', array $servers = [])
+    public function __construct(string $persistentId = '', array $servers = [], array $options = [])
     {
         $this->cache = new \Memcached($persistentId);
+
+        if ($options !== [] && $this->cache->setOptions($options) === false) {
+            throw new InvalidArgumentException('Invalid $options');
+        }
+
         $this->initServers($servers, $persistentId);
     }
 
