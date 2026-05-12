@@ -6,7 +6,9 @@ namespace Yiisoft\Cache\Memcached;
 
 use DateInterval;
 use DateTime;
+use ErrorException;
 use Psr\SimpleCache\CacheInterface;
+use Throwable;
 use Traversable;
 
 use function array_fill_keys;
@@ -68,12 +70,17 @@ final class Memcached implements CacheInterface
 
         if ($options !== []) {
 
-            set_error_handler(function ($errno, $errstr) {
-                throw new InvalidArgumentException($errstr, 0, $errno);
+            set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+                throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
             });
 
-            $this->cache->setOptions($options);
-            restore_error_handler();
+            try {
+                $this->cache->setOptions($options);
+            } catch (Throwable $e) {
+                throw new InvalidArgumentException($e->getMessage(), $e->getCode(), $e);
+            } finally {
+                restore_error_handler();
+            }
         }
 
         $this->initServers($servers, $persistentId);
