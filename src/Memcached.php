@@ -15,6 +15,8 @@ use function array_keys;
 use function array_map;
 use function is_array;
 use function iterator_to_array;
+use function restore_error_handler;
+use function set_error_handler;
 use function strpbrk;
 use function time;
 use function is_int;
@@ -64,8 +66,14 @@ final class Memcached implements CacheInterface
     {
         $this->cache = new \Memcached($persistentId);
 
-        if ($options !== [] && $this->cache->setOptions($options) === false) {
-            throw new InvalidArgumentException('Invalid $options');
+        if ($options !== []) {
+
+            set_error_handler(function ($errno, $errstr) {
+                throw new InvalidArgumentException($errstr, 0, $errno);
+            });
+
+            $this->cache->setOptions($options);
+            restore_error_handler();
         }
 
         $this->initServers($servers, $persistentId);
