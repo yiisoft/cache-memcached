@@ -54,13 +54,20 @@ final class Memcached implements CacheInterface
      * To create an instance that persists between requests, use `persistentId` to specify a unique ID for the instance.
      * All instances created with the same persistent_id will share the same connection.
      * @param array $servers List of memcached servers that will be added to the server pool.
+     * @param array $options List of memcached options
      *
      * @see https://www.php.net/manual/en/memcached.construct.php
      * @see https://www.php.net/manual/en/memcached.addservers.php
+     * @see https://www.php.net/manual/en/memcached.setoptions.php
      */
-    public function __construct(string $persistentId = '', array $servers = [])
+    public function __construct(string $persistentId = '', array $servers = [], array $options = [])
     {
         $this->cache = new \Memcached($persistentId);
+
+        if ($options !== [] && $this->cache->setOptions($options) === false) {
+            throw new InvalidArgumentException('Invalid $options');
+        }
+
         $this->initServers($servers, $persistentId);
     }
 

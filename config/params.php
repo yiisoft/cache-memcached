@@ -15,6 +15,7 @@ return [
                     'weight' => Memcached::DEFAULT_SERVER_WEIGHT,
                 ],
             ],
+            'options' => [],
         ],
     ],
 ];
