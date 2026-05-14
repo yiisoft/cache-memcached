@@ -531,7 +531,7 @@ final class MemcachedTest extends TestCase
         $this->createCacheInstance(options: ['foo' => 'bar']);
     }
 
-    static public function optionsProvider(): array
+    public static function optionsProvider(): array
     {
         return [
             [
