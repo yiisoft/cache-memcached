@@ -74,8 +74,10 @@ final class Memcached implements CacheInterface
             });
 
             try {
-                $this->cache->setOptions($options);
-            } catch (Throwable $e) {
+                if ($this->cache->setOptions($options) === false) {
+                    throw new InvalidArgumentException('Unsupported options', 0);
+                }
+            } catch (ErrorException $e) {
                 throw new InvalidArgumentException($e->getMessage(), 0, $e);
             } finally {
                 restore_error_handler();
