@@ -12,6 +12,7 @@ return [
         '__construct()' => [
             $params['yiisoft/cache-memcached']['memcached']['persistentId'],
             $params['yiisoft/cache-memcached']['memcached']['servers'],
+            $params['yiisoft/cache-memcached']['memcached']['options'],
         ],
     ],
 ];

@@ -6,7 +6,9 @@ namespace Yiisoft\Cache\Memcached;
 
 use DateInterval;
 use DateTime;
+use ErrorException;
 use Psr\SimpleCache\CacheInterface;
+use Throwable;
 use Traversable;
 
 use function array_fill_keys;
@@ -15,6 +17,8 @@ use function array_keys;
 use function array_map;
 use function is_array;
 use function iterator_to_array;
+use function restore_error_handler;
+use function set_error_handler;
 use function strpbrk;
 use function time;
 use function is_int;
@@ -54,13 +58,32 @@ final class Memcached implements CacheInterface
      * To create an instance that persists between requests, use `persistentId` to specify a unique ID for the instance.
      * All instances created with the same persistent_id will share the same connection.
      * @param array $servers List of memcached servers that will be added to the server pool.
+     * @param array $options List of memcached options.
      *
      * @see https://www.php.net/manual/en/memcached.construct.php
      * @see https://www.php.net/manual/en/memcached.addservers.php
+     * @see https://www.php.net/manual/en/memcached.setoptions.php
      */
-    public function __construct(string $persistentId = '', array $servers = [])
+    public function __construct(string $persistentId = '', array $servers = [], array $options = [])
     {
         $this->cache = new \Memcached($persistentId);
+
+        if ($options !== []) {
+            set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+                throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+            });
+
+            try {
+                if ($this->cache->setOptions($options) === false) {
+                    throw new InvalidArgumentException('Unsupported options', 0);
+                }
+            } catch (ErrorException $e) {
+                throw new InvalidArgumentException($e->getMessage(), 0, $e);
+            } finally {
+                restore_error_handler();
+            }
+        }
+
         $this->initServers($servers, $persistentId);
     }
 
