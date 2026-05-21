@@ -525,9 +525,26 @@ final class MemcachedTest extends TestCase
         $cache->has($key);
     }
 
-    public function testInvalidOptions(): void
+    public static function invalidOptionsProvider(): array
+    {
+        return [
+            [true],
+            [false],
+        ];
+    }
+
+    /**
+     * @dataProvider invalidOptionsProvider
+     */
+    public function testInvalidOptions(bool $hideWarning): void
     {
         $this->expectException(\Yiisoft\Cache\Memcached\InvalidArgumentException::class);
+
+        if ($hideWarning) {
+            error_reporting(E_ERROR | E_PARSE);
+            $this->expectExceptionMessage('Unsupported options');
+        }
+
         $this->createCacheInstance(options: ['foo' => 'bar']);
     }
 
