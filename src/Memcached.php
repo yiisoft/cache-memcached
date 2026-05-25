@@ -68,18 +68,8 @@ final class Memcached implements CacheInterface
     {
         $this->cache = new \Memcached($persistentId);
 
-        if ($options !== []) {
-            set_error_handler(function ($errno, $errstr) {
-                throw new InvalidArgumentException($errstr, 0);
-            });
-
-            try {
-                if ($this->cache->setOptions($options) === false) {
-                    throw new InvalidArgumentException('Unsupported options', 0);
-                }
-            } finally {
-                restore_error_handler();
-            }
+        if ($options !== [] && @$this->cache->setOptions($options) === false) {
+            throw new InvalidArgumentException('Unsupported options', 0);
         }
 
         $this->initServers($servers, $persistentId);
