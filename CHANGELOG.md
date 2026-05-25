@@ -6,7 +6,7 @@
 - Enh #62: Improve list of memcached server validation (@vjik)
 - Enh #73: Explicitly import classes and functions in "use" section (@mspirkov)
 - Enh #76: Remove unnecessary files from Composer package (@mspirkov)
-- Feat #84: Add `$options` to `Memcached::__construct()` and defaults to `$params` (@Gerych1984)
+- New #80: Add `$options` to `Memcached::__construct()` and defaults to `$params` (@Gerych1984)
 
 ## 2.0.0 February 15, 2023
 
