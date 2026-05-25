@@ -228,7 +228,7 @@ final class MemcachedTest extends TestCase
 
         $this->assertSameExceptObject($data, $cache->getMultiple($keys));
 
-        $cache->deleteMultiple($keys);
+        $this->assertTrue($cache->deleteMultiple($keys));
         $emptyData = array_map(static fn() => null, $data);
 
         $this->assertSameExceptObject($emptyData, $cache->getMultiple($keys));
@@ -258,11 +258,19 @@ final class MemcachedTest extends TestCase
         $this->assertTrue($cache->has('a'));
         $this->assertTrue($cache->has('b'));
 
-        $cache->set('a', 11, -1);
+        $this->assertTrue($cache->set('a', 11, -1));
         $this->assertFalse($cache->has('a'));
 
-        $cache->set('b', 22, 0);
+        $this->assertTrue($cache->set('b', 22, 0));
         $this->assertFalse($cache->has('b'));
+    }
+
+    public function testSetWithExpiredTtlReturnsDeleteResultForMissingKey(): void
+    {
+        $cache = $this->createCacheInstance();
+
+        $this->assertFalse($cache->set('missing', 'value', 0));
+        $this->assertFalse($cache->has('missing'));
     }
 
     /**
@@ -299,6 +307,16 @@ final class MemcachedTest extends TestCase
         $ttl = $ttl < 2_592_001 ? $ttl : $ttl - time();
 
         $this->assertSameExceptObject($expectedResult, $ttl);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public function testNormalizeTtlKeepsThirtyDaysAsRelativeExpiration(): void
+    {
+        $cache = $this->createCacheInstance();
+
+        $this->assertSame(2_592_000, $this->invokeMethod($cache, 'normalizeTtl', [2_592_000]));
     }
 
     public function iterableProvider(): array
@@ -373,6 +391,21 @@ final class MemcachedTest extends TestCase
         $this->assertEquals([['2.2.2.2', 11211, 1]], $newServers);
     }
 
+    /**
+     * @throws ReflectionException
+     */
+    public function testNormalizeServersPreservesCustomWeight(): void
+    {
+        $cache = $this->createCacheInstance();
+
+        $this->assertSame(
+            [[MEMCACHED_HOST, MEMCACHED_PORT, 10]],
+            $this->invokeMethod($cache, 'normalizeServers', [
+                [['host' => MEMCACHED_HOST, 'port' => MEMCACHED_PORT, 'weight' => 10]],
+            ]),
+        );
+    }
+
     public function testThatServerWeightIsOptional(): void
     {
         $cache = $this->createCacheInstance(microtime() . __METHOD__, [
@@ -437,12 +470,15 @@ final class MemcachedTest extends TestCase
     public function invalidServersConfigProvider(): array
     {
         return [
-            [[[]]],
-            [[['1.1.1.1']]],
-            [['host' => MEMCACHED_HOST]],
-            [['port' => MEMCACHED_PORT]],
-            [['host' => null, 'port' => MEMCACHED_PORT]],
-            [['host' => MEMCACHED_HOST, 'port' => null]],
+            'empty-server' => [[[]]],
+            'indexed-server' => [[['1.1.1.1']]],
+            'missing-port' => [[['host' => MEMCACHED_HOST]]],
+            'missing-host' => [[['port' => MEMCACHED_PORT]]],
+            'host-null' => [[['host' => null, 'port' => MEMCACHED_PORT]]],
+            'host-integer' => [[['host' => 1, 'port' => MEMCACHED_PORT]]],
+            'port-null' => [[['host' => MEMCACHED_HOST, 'port' => null]]],
+            'port-string' => [[['host' => MEMCACHED_HOST, 'port' => (string) MEMCACHED_PORT]]],
+            'weight-string' => [[['host' => MEMCACHED_HOST, 'port' => MEMCACHED_PORT, 'weight' => '1']]],
         ];
     }
 
@@ -483,6 +519,16 @@ final class MemcachedTest extends TestCase
         $cache = $this->createCacheInstance();
         $this->expectException(InvalidArgumentException::class);
         $cache->set($key, 'value');
+    }
+
+    /**
+     * @dataProvider invalidKeyProvider
+     */
+    public function testSetMultipleThrowExceptionForInvalidKeys(mixed $key): void
+    {
+        $cache = $this->createCacheInstance();
+        $this->expectException(InvalidArgumentException::class);
+        $cache->setMultiple([$key => 'value']);
     }
 
     /**
