@@ -38,7 +38,7 @@ composer require yiisoft/cache-memcached
 Creating an instance:
 
 ```php
-$cache = new \Yiisoft\Cache\Memcached\Memcached($persistentId, $servers);
+$cache = new \Yiisoft\Cache\Memcached\Memcached($persistentId, $servers, $options);
 ```
 
 `$persistentId (string)` - The ID that identifies the Memcached instance is an empty string by default.
@@ -82,6 +82,11 @@ $servers => [
 
 For more information, see the description of the
 [`\Memcached::addServers()`](https://www.php.net/manual/memcached.addservers.php).
+
+`$options` - List of memcached options 
+
+For more information, see the description of the
+[`\Memcached::setOptions()`](https://www.php.net/manual/en/memcached.setoptions.php).
 
 ## General usage
 
