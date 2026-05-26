@@ -16,6 +16,7 @@ $finder = (new Finder())->in([
 return (new Config())
     ->setRiskyAllowed(true)
     ->setParallelConfig(ParallelConfigFactory::detect())
+    ->setCacheFile(__DIR__ . '/runtime/.php-cs-fixer.cache')
     ->setRules([
         '@PER-CS2.0' => true,
         'nullable_type_declaration' => true,
