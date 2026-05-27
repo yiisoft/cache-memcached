@@ -529,6 +529,7 @@ final class MemcachedTest extends TestCase
     {
         $this->expectException(\Yiisoft\Cache\Memcached\InvalidArgumentException::class);
         $this->expectExceptionMessage('Unsupported options');
+        $this->expectExceptionCode(0);
 
         $this->createCacheInstance(options: ['foo' => 'bar']);
     }
