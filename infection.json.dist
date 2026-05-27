@@ -11,11 +11,6 @@
         }
     },
     "mutators": {
-        "@default": true,
-        "TrueValue": {
-            "ignore": [
-                "Yiisoft\\Cache\\Memcached\\Memcached::getNewServers"
-            ]
-        }
+        "@default": true
     }
 }
