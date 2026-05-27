@@ -63,11 +63,6 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProvider
-     *
-     * @param $key
-     * @param $value
-     *
-     * @throws InvalidArgumentException
      */
     public function testSet($key, $value): void
     {
@@ -80,11 +75,6 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProvider
-     *
-     * @param $key
-     * @param $value
-     *
-     * @throws InvalidArgumentException
      */
     public function testGet($key, $value): void
     {
@@ -97,11 +87,6 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProvider
-     *
-     * @param $key
-     * @param $value
-     *
-     * @throws InvalidArgumentException
      */
     public function testValueInCacheCannotBeChanged($key, $value): void
     {
@@ -122,11 +107,6 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProvider
-     *
-     * @param $key
-     * @param $value
-     *
-     * @throws InvalidArgumentException
      */
     public function testHas($key, $value): void
     {
@@ -150,11 +130,6 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProvider
-     *
-     * @param $key
-     * @param $value
-     *
-     * @throws InvalidArgumentException
      */
     public function testDelete($key, $value): void
     {
@@ -168,11 +143,6 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProvider
-     *
-     * @param $key
-     * @param $value
-     *
-     * @throws InvalidArgumentException
      */
     public function testClear($key, $value): void
     {
@@ -188,8 +158,6 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProviderSetMultiple
-     *
-     * @throws InvalidArgumentException
      */
     public function testSetMultiple(?int $ttl): void
     {
@@ -275,10 +243,6 @@ final class MemcachedTest extends TestCase
 
     /**
      * Data provider for {@see testNormalizeTtl()}
-     *
-     * @throws Exception
-     *
-     * @return array test data
      */
     public function dataProviderNormalizeTtl(): array
     {
@@ -297,8 +261,6 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider dataProviderNormalizeTtl
-     *
-     * @throws ReflectionException
      */
     public function testNormalizeTtl(mixed $ttl, mixed $expectedResult): void
     {
@@ -309,9 +271,6 @@ final class MemcachedTest extends TestCase
         $this->assertSameExceptObject($expectedResult, $ttl);
     }
 
-    /**
-     * @throws ReflectionException
-     */
     public function testNormalizeTtlKeepsThirtyDaysAsRelativeExpiration(): void
     {
         $cache = $this->createCacheInstance();
@@ -351,8 +310,6 @@ final class MemcachedTest extends TestCase
 
     /**
      * @dataProvider iterableProvider
-     *
-     * @throws InvalidArgumentException
      */
     public function testValuesAsIterable(array $array, iterable $iterable): void
     {
@@ -391,9 +348,6 @@ final class MemcachedTest extends TestCase
         $this->assertEquals([['2.2.2.2', 11211, 1]], $newServers);
     }
 
-    /**
-     * @throws ReflectionException
-     */
     public function testNormalizeServersPreservesCustomWeight(): void
     {
         $cache = $this->createCacheInstance();
@@ -623,17 +577,11 @@ final class MemcachedTest extends TestCase
     }
 
     /**
-     * Invokes a inaccessible method.
+     * Invokes an inaccessible method.
      *
-     * @param $object
-     * @param $method
-     * @param bool $revoke whether to make method inaccessible after execution
-     *
-     * @throws ReflectionException
-     *
-     * @return mixed
+     * @param bool $revoke Whether to make method inaccessible after execution
      */
-    private function invokeMethod($object, $method, array $args = [], bool $revoke = true)
+    private function invokeMethod($object, $method, array $args = [], bool $revoke = true): mixed
     {
         $reflection = new ReflectionObject($object);
         $method = $reflection->getMethod($method);
