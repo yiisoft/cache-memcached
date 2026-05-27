@@ -1,0 +1,25 @@
+name: yii-cache-memcached
+
+services:
+  php:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.1}
+    volumes:
+      - ..:/app
+    working_dir: /app
+    init: true
+    user: "${USER_ID:-1000}:${GROUP_ID:-1000}"
+    environment:
+      YII_INSIDE_CONTAINER: "true"
+      MEMCACHED_HOST: memcached
+      MEMCACHED_PORT: 11211
+      COMPOSER_CACHE_DIR: /app/runtime/composer-cache
+      HISTFILE: /app/runtime/.docker_shell_history
+    depends_on:
+      - memcached
+
+  memcached:
+    image: memcached:latest
