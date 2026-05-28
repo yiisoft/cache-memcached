@@ -13,8 +13,8 @@
     "mutators": {
         "@default": true,
         "TrueValue": {
-            "ignore": [
-                "Yiisoft\\Cache\\Memcached\\Memcached::getNewServers"
+            "ignoreSourceCodeByRegex": [
+                "\\$existingServers\\[\"{\\$existingServer\\['host'\\]}:{\\$existingServer\\['port'\\]}\"\\] = true;$"
             ]
         }
     }
