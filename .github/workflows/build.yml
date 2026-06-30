@@ -49,7 +49,7 @@ jobs:
 
     steps:
       - name: Install service memcached
-        uses: niden/actions-memcached@3b3ecd9d0d035ea92db716dc1540a7dbe9e56349 # v7
+        uses: niden/actions-memcached@9ff2b102979272958682d09bf262563039bea69c # v8
 
       - name: Checkout
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
