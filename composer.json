@@ -40,6 +40,7 @@
         "phpunit/phpunit": "^9.5",
         "rector/rector": "^2.0.3",
         "roave/infection-static-analysis-plugin": "^1.16",
+        "shipmonk/composer-dependency-analyser": "^1.8",
         "spatie/phpunit-watcher": "^1.23",
         "vimeo/psalm": "^4.30 || ^5.26.1 || ^6.16.1",
         "yiisoft/di": "^1.2"
@@ -80,6 +81,7 @@
         }
     },
     "scripts": {
+        "dependency-analyser": "composer-dependency-analyser",
         "test": "phpunit --testdox --no-interaction",
         "test-watch": "phpunit-watcher watch",
         "psalm": "psalm"
