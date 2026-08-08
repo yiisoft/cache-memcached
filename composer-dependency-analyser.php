@@ -10,6 +10,4 @@ return (new Configuration())
     ->setFileExtensions(['php'])
     ->addPathToScan(__DIR__ . '/config', isDev: false)
     ->addPathToScan(__DIR__ . '/src', isDev: false)
-    ->addPathToScan(__DIR__ . '/tests', isDev: true)
-    ->ignoreUnknownClasses(['Memcached'])
-    ->ignoreErrorsOnExtension('ext-memcached', [ErrorType::UNUSED_DEPENDENCY]);
+    ->addPathToScan(__DIR__ . '/tests', isDev: true);
