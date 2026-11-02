@@ -278,7 +278,7 @@ final class Memcached implements CacheInterface
 
     private function validateKey(string $key): void
     {
-        if ($key === '' || strpbrk($key, '{}()/\@:')) {
+        if ($key === '' || strpbrk($key, '{}()/\@:') !== false) {
             throw new InvalidArgumentException('Invalid key value.');
         }
     }
