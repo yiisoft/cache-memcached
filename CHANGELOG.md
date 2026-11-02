@@ -7,6 +7,7 @@
 - Enh #73: Explicitly import classes and functions in "use" section (@mspirkov)
 - Enh #76: Remove unnecessary files from Composer package (@mspirkov)
 - New #80: Add `$options` to `Memcached::__construct()` (@Gerych1984)
+- Enh #103: Use strict comparison for `strpbrk()` result in key validation (@vjik)
 
 ## 2.0.0 February 15, 2023
 
